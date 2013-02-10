@@ -7,20 +7,26 @@ Created by Peter Meckiffe on 2013-02-04.
 Copyright (c) 2013 UWE. All rights reserved.
 """
 
-import sys
-import os
-import unittest
-import hashlib
-from SMSSecMessage import SMSSecMessage
-from SMSSecHandshakeFirstMessage import SMSSecHandshakeFirstMessage
-from SMSSecHandshakeResponseMessage import SMSSecHandshakeResponseMessage
-from Crypto.PublicKey import RSA
+import SMSSec
+import SMSSecEncrypt
+import SMSSecDecrypt
 from Crypto import Random
+from Crypto.PublicKey import RSA
 
 if __name__ == '__main__':
 	random_generator = Random.new().read
 	key = RSA.generate(1024, random_generator)
-	smsClient = SMSSecHandshakeFirstMessage("+44898989898","+4489791469")
-	smsClient.createMessage("1234abcd", key.publickey().exportKey(), 1)
-	smsServer = SMSSecHandshakeResponseMessage("+4489791469","+44898989898")
-	smsServer.createMessage(smsClient.message,"1234abcd",key.exportKey())
+	details = SMSSec.SMSSecMachineDetails("+447872124086","abcd1234")
+	smsClient = SMSSecEncrypt.SMSSecHandshakeFirstMessage("+442033229681",details)
+	
+	smsClient.createMessage(key.publickey().exportKey(), 1)
+	decryptor = SMSSecDecrypt.SMSSecDecryptFirstHandshakeMessage("+442033229681",details,key.exportKey())
+	
+	aes_key, session_id, random_challenge = decryptor.decrypt(smsClient.message)
+	if (random_challenge!= smsClient.random_challenge):
+		print "FUCK"
+	responseBuilder = SMSSecEncrypt.SMSSecHandshakeResponseMessage("442033229681", details)
+	responseBuilder.createMessage(random_challenge, session_id)
+	
+	
+	
