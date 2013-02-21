@@ -7,9 +7,7 @@ Created by Peter Meckiffe on 2013-02-04.
 Copyright (c) 2013 UWE. All rights reserved.
 """
 
-import SMSSec
-import SMSSecEncrypt
-import SMSSecDecrypt
+from SMSSec import *
 from Crypto import Random
 from Crypto.PublicKey import RSA
 
@@ -24,7 +22,6 @@ if __name__ == '__main__':
 	
 	aes_key, session_id, random_challenge = decryptor.decrypt(smsClient.message)
 	if (random_challenge!= smsClient.random_challenge):
-		print "FUCK"
 	responseBuilder = SMSSecEncrypt.SMSSecHandshakeResponseMessage("442033229681", details)
 	responseBuilder.createMessage(random_challenge, session_id)
 	
