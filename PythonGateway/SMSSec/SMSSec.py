@@ -36,128 +36,48 @@ def generatePass(machine_pass, seed):
 		x = hashlib.sha256(x.hexdigest()+machine_pass+seed)
 	return x.hexdigest()[0:16]
 
+
 class SMSSecServerDataStore(object):
-	def __init__(self, server_telephone, private_key, public_key):
-		self.server_telephone = server_telephone
-		self.private_key = private_key
-		self.public_key =public_key
-		self.booth_current_sessions = dict()
+	def __init__(self, this_telephone, this_key):
+		self.this_telephone = this_telephone
+		self.private_key = this_key.export_key()
+		self.public_key =this_key.public_key().export_key()
+		self.sessions_dictionary = dict()
 		self.session_log = dict()
 	
-	def addDetail(self, booth_telephone, booth_password):
-		self.booth_current_sessions[booth_telephone]={"password":booth_password,"session":None}
+	def addDetail(self, recipient_telephone, recipient_password, recipient_PK):
+		self.sessions_dictionary[recipient_telephone]={"password":recipient_password,"public_key":recipient_PK,"session":None}
 	
-	def startNewSession(self, booth_telephone, session_id, iv, key_params, random_challenge):
-		if self.booth_current_sessions[booth_telephone]["session"] is not None:
+	def startNewSession(self, recipient_telephone, session_id, iv, key_params, random_challenge):
+		if self.sessions_dictionary[recipient_telephone]["session"] is not None:
 			raise ValueError("Session already exists")
-		self.booth_current_sessions[booth_telephone]["session"]=SMSSecSession(booth_telephone, session_id, iv, key_params, self.booth_current_sessions[booth_telephone]["password"], random_challenge)
+		self.sessions_dictionary[recipient_telephone]["session"]=SMSSecSession(recipient_telephone, session_id, iv, key_params, self.sessions_dictionary[recipient_telephone]["password"], random_challenge)
 	
-	def incrementReceiveSequence(self, booth_telephone):
-		if self.booth_current_sessions[booth_telephone]["session"] != None:
-			self.booth_current_sessions[booth_telephone]["session"].incrementReceiveSequence()
+	def incrementReceiveSequence(self, recipient_telephone):
+		if self.sessions_dictionary[recipient_telephone]["session"] != None:
+			self.sessions_dictionary[recipient_telephone]["session"].incrementReceiveSequence()
 	
-	def incrementSendSequence(self, booth_telephone):
-		if self.booth_current_sessions[booth_telephone]["session"] != None:
-			self.booth_current_sessions[booth_telephone]["session"].incrementSendSequence()
+	def incrementSendSequence(self, recipient_telephone):
+		if self.sessions_dictionary[recipient_telephone]["session"] != None:
+			self.sessions_dictionary[recipient_telephone]["session"].incrementSendSequence()
 	
-	def getReceiveSequence(self,booth_telephone):
-		return self.booth_current_sessions[booth_telephone]["session"].receive_sequence
+	def getSessionDetails(self, recipient_telephone):
+		return self.sessions_dictionary[recipient_telephone]["session"].getDetails()
 	
-	def getSendSequence(self,booth_telephone):
-		return self.booth_current_sessions[booth_telephone]["session"].send_sequence
+	def addRecievedMessagePart(self, recipient_telephone, message):
+		self.sessions_dictionary[recipient_telephone]["session"].receiveMessagePart(message)
 	
-	def getSessionDetails(self, booth_telephone):
-		return self.booth_current_sessions[booth_telephone]["session"].getDetails()
+	def storeMessage(self, recipient_telephone, message):
+		self.sessions_dictionary[recipient_telephone]["session"].addMessage(message)
 	
-	def getBoothPassword(self, booth_telephone):
-		return self.booth_current_sessions[booth_telephone]["password"]
+	def getBoothPassword(self, recipient_telephone):
+		return self.sessions_dictionary[recipient_telephone]["password"]
 	
-	def endSession(self, booth_telephone):
-		if self.booth_current_sessions[booth_telephone]["session"]:
-			self.session_log[self.booth_current_sessions[booth_telephone]["session"].terminate()]=self.booth_current_sessions[booth_telephone]["session"].getDetails()
-			self.booth_current_sessions[booth_telephone]["session"] = None
-	
-
-class SMSSecSession(object):
-	def __init__(self, assoc_telephone, session_id, iv, key_params, booth_password, random_challenge):
-		self.aes_key = generatePass(booth_password, key_params)
-		self.iv = iv
-		self.random_challenge = random_challenge
-		self.assoc_telephone = assoc_telephone
-		self.session_id = session_id
-		self.receive_sequence = 0
-		self.send_sequence = 0
-		self.time_terminated = None
-		self.time_started = self.last_send_increment = self.last_receive_increment = time.time()
-	
-	def incrementSendSequence(self):
-		self.last_send_increment = time.time()
-		self.send_sequence+=1
-	
-	def incrementReceiveSequence(self):
-		self.last_receive_increment = time.time()
-		self.receive_sequence+=1
-	
-	def getDetails(self):
-		return {"random_challenge":self.random_challenge,
-				"telephone":self.assoc_telephone,
-				"session_id":self.session_id,
-				"send_sequence":self.send_sequence,
-				"receive_sequence":self.receive_sequence,
-				"key":self.aes_key,
-				"send_iv":self._getIV(self.send_sequence),
-				"receive_iv":self._getIV(self.receive_sequence),
-				"timestarted":self.time_started,
-				"last_recieve_at":self.last_receive_increment,
-				"last_send_at":self.last_send_increment,
-				"terminated":self.time_terminated}
-	
-	def terminate(self):
-		self.time_terminated = time.time()
-		return self.session_id
-	
-	def _getIV(self, SQ):
-		IV = self.iv
-		for i in range(0,SQ):
-			IV = hashlib.sha256(IV).hexdigest()[0:16]
-		return IV
-	
-
-class SMSSecClientStore(object):
-	def __init__(self, booth_telephone, booth_password, server_telephone, server_public_key):
-		self.booth_telephone = booth_telephone
-		self.booth_password = booth_password
-		self.server_telephone = server_telephone
-		self.server_public_key = server_public_key
-		self.session_log = dict()
-		self.current_session = None
-	
-	def startNewSession(self, session_id, iv, key_params, random_challenge):
-		self.endCurrentSession()
-		self.current_session = SMSSecSession(self.server_telephone, session_id, iv, key_params, self.booth_password, random_challenge)
-	
-	def getCurrentSessionDetails(self):
-		if self.current_session != None:
-			return self.current_session.getDetails()
-	
-	def endCurrentSession(self):
-		if self.current_session != None:
-			self.session_log[self.current_session.terminate()]=self.current_session.getDetails
-			self.current_session = None
-	
-	def incrementRecieveSequence(self):
-		if self.current_session != None:
-			self.current_session.incrementReceiveSequence()
-	
-	def incrementSendSequence(self):
-		if self.current_session != None:
-			self.current_session.incrementSendSequence()
-	
-	def getReceiveSequence(self):
-		return self.current_session.receive_sequence
-	
-	def getSendSequence(self):
-		return self.current_session.send_sequence
+	def endSession(self, recipient_telephone):
+		if self.sessions_dictionary[recipient_telephone]["session"]:
+			terminated = self.sessions_dictionary[recipient_telephone]["session"].terminate()
+			self.session_log[terminated["telephone"]][terminated["session_id"]]=self.sessions_dictionary[recipient_telephone]["session"].getDetails()
+			self.sessions_dictionary[recipient_telephone]["session"] = None
 	
 
 class AESCipher(object):

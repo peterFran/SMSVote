@@ -31,7 +31,7 @@ class SMSSecInitiatorMessage(SMSSecMessage):
 		self.message = public_key.encrypt(message,32)[0]
 		return {"random_challenge":random_challenge, "iv":IV, "key_params":key_params, "session_id":session_id}
 	
-	def decrypt(self, encrypted_message, booth_password, private_key):
+	def decryptMessage(self, encrypted_message, booth_password, private_key):
 		private_key =RSA.importKey(private_key)
 		message = private_key.decrypt(encrypted_message)
 		telephone, parts = message.split(":",1)

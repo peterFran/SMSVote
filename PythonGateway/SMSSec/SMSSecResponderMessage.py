@@ -21,7 +21,7 @@ class SMSSecResponderMessage(SMSSecMessage):
 		enc_obj = AESCipher(aes_key)
 		self.message = enc_obj.encrypt(random_challenge+"0", iv)
 	
-	def decrypt(self, encrypted_message, random_challenge, iv, aes_key):
+	def decryptMessage(self, encrypted_message, random_challenge, iv, aes_key):
 		enc_obj = AESCipher(aes_key)
 		plaintext = enc_obj.decrypt(encrypted_message, iv)
 		sequence_number = plaintext[-1]
