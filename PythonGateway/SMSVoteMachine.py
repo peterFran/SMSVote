@@ -45,25 +45,36 @@ class SMSVoteMachine:
 				details = self.data_store.getSessionDetails(from_field)
 				responder.decryptMessage(message_body, details['random_challenge'], details['send_iv'], details['key'])
 				# increment recieved count
-				self.data_store.incrementReceiveCount(from_field)
+				self.data_store.incrementReceiveSequence(from_field)
 				# get message from backburner
 				message = details['message']
 				# send message
+				self.sendMessage(from_field, message)
 			else:
+				# Get session details
+				details = self.data_store.getSessionDetails(from_field)
+				
 				# decrypt message
+				message = SMSSecSequenceMessage(self.data_store.this_telephone, from_field)
+				decrypted_message = message.decryptMessage(message_body, details["receive_sequence"], details["receive_iv"], details["key"])
 				# increment recieved count
-				if contents[-3:] == "END":
+				self.data_store.incrementReceiveSequence(from_field)
+				# append message to the store
+				self.data_store.addRecievedMessagePart(from_field, message)
+				details = self.data_store.getSessionDetails(from_field)
+				# Check if end
+				if details["received_message"][-3:] == "END":
 					# check store for message, append this message to it, the return
-				else:
-					# append message to the store
-				# add message to contents to data_store
+					return details["received_message"]
 		except:
 			print "Recipient machine isn't registered"
+	
 	# Returns array of messages for sending to client
 	def sendMessage(to_field, message_body):
 		try:
 			if self.data_store.getSessionDetails(from_field) is None:
 				# put message on backburner
+				
 				# create init
 				# create session
 				# increment send count
