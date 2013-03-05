@@ -27,6 +27,19 @@ class TwilioMessageManager:
 		for m in messages:
 			print m.body
 			print m.from_
+	def sendMessage(message):
+		# Download the Python helper library from twilio.com/docs/libraries
+		from twilio.rest import TwilioRestClient
+
+		# Your Account Sid and Auth Token from twilio.com/user/account
+		account_sid = "My sid"
+		auth_token  = "My auth"
+		client = TwilioRestClient(account_sid, auth_token)
+
+		twi_message = client.sms.messages.create(body=message.message,
+		    to=message.to_field,
+		    from_=message.from_field)
+		print twi_message.sid
 
 
 class TwilioTests(unittest.TestCase):
