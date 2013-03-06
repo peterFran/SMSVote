@@ -15,8 +15,8 @@ from datetime import datetime
 
 
 class TwilioMessageManager:
-	def __init__(self, account_sid, auth_token):
-		self.client = TwilioRestClient(account_sid, auth_token)
+	def __init__(self):
+		self.client = TwilioRestClient("AC58b8ab2ad7e7141d938446113f56ccda", "665924eabbf1d698908258c83999c670")
 	def getMessagesRecievedInLastXMinutes(self,x):
 		#message = client.sms.messages.create(to="+447872124086", from_="+442033229681", body="Hello there!")
 		time =  datetime.now()
@@ -27,18 +27,10 @@ class TwilioMessageManager:
 		for m in messages:
 			print m.body
 			print m.from_
-	def sendMessage(message):
-		# Download the Python helper library from twilio.com/docs/libraries
-		from twilio.rest import TwilioRestClient
-
-		# Your Account Sid and Auth Token from twilio.com/user/account
-		account_sid = "My sid"
-		auth_token  = "My auth"
-		client = TwilioRestClient(account_sid, auth_token)
-
-		twi_message = client.sms.messages.create(body=message.message,
-		    to=message.to_field,
-		    from_=message.from_field)
+	def sendMessage(self, message):
+		twi_message = self.client.sms.messages.create(body=message.message,
+		    to=message.recipient_telephone,
+		    from_=message.sender_telephone)
 		print twi_message.sid
 
 

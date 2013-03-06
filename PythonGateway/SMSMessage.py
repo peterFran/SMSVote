@@ -13,9 +13,9 @@ import unittest
 
 
 class SMSMessage(object):
-	def __init__(self, destination_telephone, sender_telephone):
+	def __init__(self, recipient_telephone, sender_telephone):
 		self.sender_telephone = sender_telephone
-		self.destination_telephone = destination_telephone
+		self.recipient_telephone = recipient_telephone
 		self.message = None
 	
 	def createMessage(payload):

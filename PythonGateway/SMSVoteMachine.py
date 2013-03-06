@@ -18,8 +18,16 @@ from Crypto.PublicKey import RSA
 from Crypto import Random
 
 
-class SMSVoteMachine:
+class SMSVoteMachine(object):
+	# Make class a Singleton class
+	# _instance = None
+	# def __new__(cls, *args, **kwargs):
+	# 	if not cls._instance:
+	# 		cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+	# 	return cls._instance
+	
 	def __init__(self, this_telephone, key, password, clients):
+		
 		# Create stores
 		self.data_store = SMSSecDataStore(this_telephone, key, password)
 		if clients is not None:
@@ -48,10 +56,7 @@ class SMSVoteMachine:
 				# increment recieved count
 				self.data_store.incrementReceiveSequence(from_field)
 				# send message
-				msg = self.sendMessage(from_field, None)
-				"MSG"
-				print msg
-				return msg
+				return self.sendMessage(from_field, None)
 			
 			# If receiving a message
 			else:
@@ -72,10 +77,6 @@ class SMSVoteMachine:
 				# Otherwise just append
 				self.data_store.addRecievedMessagePart(from_field, decrypted_message)
 				details = self.data_store.getSessionDetails(from_field)
-				# Check if end
-				if details["received_message"][-3:] == "END":
-					# check store for message, append this message to it, the return
-					return {"status":5,"message":details["received_message"]}
 				return {"status":4, "message":details["received_message"]}
 		#except:
 			#print "Recipient machine isn't registered"
@@ -113,7 +114,9 @@ class SMSVoteMachine:
 					message_body = self.data_store.getSessionDetails(to_field)['stored_message']
 				if message_body is not None:
 					# Divide message
-					divided_messages = self.divideMessage(message_body)
+					message_body+="END"
+					details = self.data_store.getSessionDetails(to_field)
+					divided_messages = self.divideMessage(message_body, details['send_sequence'])
 					messages = []
 					for message in divided_messages:
 						# increment send count
@@ -130,16 +133,19 @@ class SMSVoteMachine:
 		#except:
 			#"Recipient machine doesn't exist"
 	
-	def divideMessage(self, message_body):
+	def divideMessage(self, message_body, first_sq):
 		# Length must not excede 94 NORMAL CHARACTERS. SPECIAL CHARS WILL CAUSE INIHILATION
 		output = []
+		count = first_sq
 		while len(message_body)>0:
-			if len(message_body)<94:
+			size = 95 - len(str(count))
+			if len(message_body)<size:
 				output.append(message_body)
 				message_body = ""
 			else:
-				output.append(message_body[:94])
-				message_body = message_body[94:]
+				output.append(message_body[:size])
+				message_body = message_body[size:]
+				count += 1
 		return output
 	
 
