@@ -22,12 +22,11 @@ class SMSSecSequenceMessage(SMSSecMessage):
 		encryptor = AESCipher(aes_key)
 		SQ = str(sequence_number)
 		self.message = encryptor.encrypt(message + SQ, iv)
-		print len(self.message)
 	
-	def decryptMessage(self, encypted_message, sequence_number, iv, aes_key):
-		print encypted_message
+	def decryptMessage(self, encrypted_message, sequence_number, iv, aes_key):
 		decryptor = AESCipher(aes_key)
-		plaintext = decryptor.decrypt(encypted_message, iv)
+		print encrypted_message
+		plaintext = decryptor.decrypt(encrypted_message, iv)
 		length = len(str(sequence_number))
 		if str(sequence_number) != plaintext[-length:]:
 			raise ValueError("AES Decryption Failed")

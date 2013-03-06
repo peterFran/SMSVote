@@ -1,0 +1,15 @@
+nslookup looks up ip of name server
+ps (-ax)
+grep
+etc/
+deamon = a service/ any application run by user who initiates the deamon
+e.g. apache deamon has a user created by apache so that there is exclusive user for apache server
+
+head and tail -n [number]
+dmesg hardware logs
+netstat
+
+
+CA = ca_pass
+CL = cl_pass
+ES = es_pass

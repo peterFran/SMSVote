@@ -14,6 +14,7 @@ import hashlib
 import time
 import base64
 from SMSMessage import SMSMessage
+from SMSSecSession import SMSSecSession
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
@@ -38,13 +39,14 @@ def generatePass(machine_pass, seed):
 
 
 class SMSSecDataStore(object):
-	def __init__(self, this_telephone, this_key):
+	def __init__(self, this_telephone, this_key, this_password):
 		self.this_telephone = this_telephone
 		self.private_key = this_key.exportKey()
 		self.public_key =this_key.publickey().exportKey()
 		self.sessions_dictionary = dict()
 		self.session_log = dict()
 		self.session_count = 0
+		self.this_password = this_password
 	
 	def addDetail(self, recipient_telephone, recipient_password, recipient_PK):
 		self.sessions_dictionary[recipient_telephone]={"password":recipient_password,"public_key":recipient_PK,"session":None}
@@ -53,10 +55,15 @@ class SMSSecDataStore(object):
 		self.session_count += 1
 		return self.session_count
 	
-	def startNewSession(self, recipient_telephone, session_id, iv, key_params, random_challenge):
+	def startNewReceivingSession(self, recipient_telephone, session_id, iv, key_params, random_challenge):
 		if self.sessions_dictionary[recipient_telephone]["session"] is not None:
 			raise ValueError("Session already exists")
 		self.sessions_dictionary[recipient_telephone]["session"]=SMSSecSession(recipient_telephone, session_id, iv, key_params, self.sessions_dictionary[recipient_telephone]["password"], random_challenge)
+	
+	def startNewSendingSession(self, recipient_telephone, session_id, iv, key_params, random_challenge):
+		if self.sessions_dictionary[recipient_telephone]["session"] is not None:
+			raise ValueError("Session already exists")
+		self.sessions_dictionary[recipient_telephone]["session"]=SMSSecSession(recipient_telephone, session_id, iv, key_params, self.this_password, random_challenge)
 	
 	def getPublicKey(self, recipient_telephone):
 		return self.sessions_dictionary[recipient_telephone]["public_key"]
@@ -70,15 +77,16 @@ class SMSSecDataStore(object):
 			self.sessions_dictionary[recipient_telephone]["session"].incrementSendSequence()
 	
 	def getSessionDetails(self, recipient_telephone):
-		return self.sessions_dictionary[recipient_telephone]["session"].getDetails()
+		if self.sessions_dictionary[recipient_telephone]["session"] != None:
+			return self.sessions_dictionary[recipient_telephone]["session"].getDetails()
 	
 	def addRecievedMessagePart(self, recipient_telephone, message):
-		self.sessions_dictionary[recipient_telephone]["session"].receiveMessagePart(message)
+		self.sessions_dictionary[recipient_telephone]["session"].addReceivedMessagePart(message)
 	
 	def storeMessage(self, recipient_telephone, message):
 		self.sessions_dictionary[recipient_telephone]["session"].addMessage(message)
 	
-	def getBoothPassword(self, recipient_telephone):
+	def getMachinePassword(self, recipient_telephone):
 		return self.sessions_dictionary[recipient_telephone]["password"]
 	
 	def endSession(self, recipient_telephone):
@@ -98,7 +106,8 @@ class AESCipher(object):
 	def encrypt( self, raw ,iv):
 		raw = self.pad(raw)
 		cipher = AES.new( self.key, AES.MODE_CBC, iv )
-		return base64.b64encode( iv + cipher.encrypt( raw ) ) 
+		bs = base64.b64encode( iv + cipher.encrypt( raw ) )
+		return bs
 	
 	def decrypt( self, enc, iv):
 		enc = base64.b64decode(enc)

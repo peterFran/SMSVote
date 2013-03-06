@@ -19,7 +19,8 @@ class SMSSecResponderMessage(SMSSecMessage):
 	
 	def createMessage(self, random_challenge, iv, aes_key):
 		enc_obj = AESCipher(aes_key)
-		self.message = enc_obj.encrypt(random_challenge+"0", iv)
+		message = random_challenge+"0"
+		self.message = enc_obj.encrypt(message, iv)
 	
 	def decryptMessage(self, encrypted_message, random_challenge, iv, aes_key):
 		enc_obj = AESCipher(aes_key)

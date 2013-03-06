@@ -10,11 +10,14 @@ Copyright (c) 2013 UWE. All rights reserved.
 import sys
 import os
 import unittest
+import SMSSec
+import time
+import hashlib
 
 
 class SMSSecSession(object):
-	def __init__(self, assoc_telephone, session_id, iv, key_params, recipient_password, random_challenge):
-		self.aes_key = generatePass(booth_password, key_params)
+	def __init__(self, assoc_telephone, session_id, iv, key_params, password, random_challenge):
+		self.aes_key = SMSSec.generatePass(password, key_params)
 		self.iv = iv
 		self.random_challenge = random_challenge
 		self.assoc_telephone = assoc_telephone
@@ -33,7 +36,7 @@ class SMSSecSession(object):
 	def addMessage(self, message):
 		self.stored_message = message
 	
-	def addRecievedMessagePart(self, message):
+	def addReceivedMessagePart(self, message):
 		self.received_message += message
 	
 	def incrementReceiveSequence(self):
@@ -47,7 +50,7 @@ class SMSSecSession(object):
 				"send_sequence":self.send_sequence,
 				"receive_sequence":self.receive_sequence,
 				"stored_message":self.stored_message,
-				"recieved_message":self.recieved_message,
+				"received_message":self.received_message,
 				"key":self.aes_key,
 				"send_iv":self._getIV(self.send_sequence),
 				"receive_iv":self._getIV(self.receive_sequence),

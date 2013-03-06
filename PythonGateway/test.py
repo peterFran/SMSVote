@@ -25,10 +25,8 @@ class testTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	test = "<m@a>"*19
+	test = "?0"
 	IV = Random.new().read(16)
 	key = Random.new().read(16)
 	aes = AESCipher(key)
 	enc = aes.encrypt(test,IV)
-	print len(test)
-	print len(enc)
