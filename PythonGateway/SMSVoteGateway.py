@@ -52,6 +52,11 @@ def yeha():
 
 @app.route("/send")
 def sendBallots():
+	import sys
+	reload(sys)
+	sys.setdefaultencoding("latin-1")
+	setup()
+	
 	xml = "<person A>"
 	for client in app.jinja_env.globals["machine"].data_store.sessions_dictionary:
 		response = app.jinja_env.globals["machine"].sendMessage(client, xml)

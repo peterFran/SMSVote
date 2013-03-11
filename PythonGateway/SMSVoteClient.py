@@ -16,8 +16,10 @@ app = Flask(__name__)
 @app.route("/", methods=["POST"])
 def receiveMessage():
 	print request.form["From"]
-	print request.form["Body"]
+	for i in  request.form["Body"]:
+		print ord(i)
 	response = app.jinja_env.globals["machine"].receiveMessage(request.form["From"], request.form["Body"])
+	
 	if response["status"]<2:
 		app.jinja_env.globals["twilio"].sendMessage(response["message"])
 	elif response["status"]==2:

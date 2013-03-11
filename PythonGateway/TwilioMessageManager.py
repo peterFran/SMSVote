@@ -12,6 +12,7 @@ import os
 import unittest
 from twilio.rest import TwilioRestClient
 from datetime import datetime
+import base64
 
 
 class TwilioMessageManager:
@@ -28,6 +29,10 @@ class TwilioMessageManager:
 			print m.body
 			print m.from_
 	def sendMessage(self, message):
+		mes = message.message
+		print len(message.message)
+		print len(base64.b64encode(mes))
+		print base64.b64encode(mes)
 		twi_message = self.client.sms.messages.create(body=message.message,
 		    to=message.recipient_telephone,
 		    from_=message.sender_telephone)

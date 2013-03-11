@@ -14,6 +14,7 @@ from Crypto import Random
 from SMSSec.SMSSec import AESCipher
 from SMSVoteMachine import *
 from Crypto.PublicKey import RSA
+import base64
 
 
 class test:
@@ -27,15 +28,15 @@ class testTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	random_generator = Random.new().read
-	key = RSA.generate(1024, random_generator)
-	random_generator = Random.new().read
-	key2 = RSA.generate(1024, random_generator)
-	f = open('clientKey.txt','w')
-	f.write(key.exportKey())
-	f = open('serverKey.txt','w')
-	f.write(key2.exportKey())
-	f = open('clientPub.txt','w')
-	f.write(key.publickey().exportKey())
-	f = open('serverPub.txt','w')
-	f.write(key.publickey().exportKey())
+	random = Random.new().read(20)
+	
+	b64 = base64.b64encode(random)
+	
+	enc = b64.encode("utf-8")
+	b2 = enc.decode('utf-8')
+	original = base64.b64decode(b2)
+	print random
+	print original
+	print b64
+	print b2
+	print enc
