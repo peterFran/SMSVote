@@ -14,6 +14,7 @@ from Crypto import Random
 from SMSSec.SMSSec import AESCipher
 from SMSVoteMachine import *
 from Crypto.PublicKey import RSA
+from SMSSec.SMSSec import *
 import base64
 
 
@@ -28,15 +29,13 @@ class testTests(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	random = Random.new().read(20)
+	key = Random.new().read(32)
+	iv = Random.new().read(16)
 	
-	b64 = base64.b64encode(random)
+	m = "d"*95
+	encryptor = AESCipher(key)
+	message = encryptor.encrypt(m, iv)
+	#print len(message)
+	for i in range (1, 100000):
+		print 95-len(str(i))
 	
-	enc = b64.encode("utf-8")
-	b2 = enc.decode('utf-8')
-	original = base64.b64decode(b2)
-	print random
-	print original
-	print b64
-	print b2
-	print enc

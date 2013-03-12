@@ -10,6 +10,8 @@ Copyright (c) 2013 UWE. All rights reserved.
 from flask import Flask, request
 from TwilioMessageManager import TwilioMessageManager
 from SMSVoteMachine import SMSVoteMachine
+from SMSVoteState.SMSMachineModel import *
+from SMSVoteState.SMSVoteMachine import *
 from Crypto.PublicKey import RSA
 app = Flask(__name__)
 
@@ -23,49 +25,43 @@ app.config.update(
 def receiveMessage():
 	print request.form["From"]
 	print request.form["Body"]
-	response = app.jinja_env.globals["machine"].receiveMessage(request.form["From"], request.form["Body"])
+	machine = SMSVoteMachine("+442033229681", request.form["From"])
+	twilio = TwilioMessageManager()
+	response = machine.receiveMessage(request.form["Body"])
+	if response["status"]==-1:
+		print "first part of init received"
 	if response["status"]<2:
-		app.jinja_env.globals["twilio"].sendMessage(response["message"])
+		twilio.sendMessage(response["message"])
 	elif response["status"]==2:
 		for message in response["messages"]:
-			app.jinja_env.globals["twilio"].sendMessage(message)
+			twilio.sendMessage(message)
+	elif response['status']==4:
+		print "receiving messages"
 	elif response["status"]==5:
 		print response["message"]
 
 @app.route("/setup")
-def setup():
-	
-	app.jinja_env.globals["twilio"] = TwilioMessageManager()
+def setup():	
 	servkey = RSA.importKey(open("serverKey.txt","r").read())
 	clientPub = open("clientPub.txt","r").read()
 	obj = SMSVoteMachine("+442033229681",servkey, "gfedcba", [{"telephone":"+441252236305","password":"abcdefg","PK":clientPub}])
-	app.jinja_env.globals["machine"] = obj
-	for i in app.jinja_env.globals["machine"].data_store.sessions_dictionary:
-		print i
-	return "hello"
-
-@app.route("/print")
-def yeha():
-	for i in app.jinja_env.globals["machine"].data_store.sessions_dictionary:
-		print i
-	return "yipee"
+	return "Setup Complete"
 
 @app.route("/send")
 def sendBallots():
-	import sys
-	reload(sys)
-	sys.setdefaultencoding("latin-1")
-	setup()
-	
 	xml = "<person A>"
-	for client in app.jinja_env.globals["machine"].data_store.sessions_dictionary:
-		response = app.jinja_env.globals["machine"].sendMessage(client, xml)
+	machine = SMSVoteMachine("+442033229681", request.form["From"])
+	machine_model = SMSMachineModel("+442033229681")
+	twilio = TwilioMessageManager()
+	
+	for client in machine_model.getAllClients():
+		response = machine.sendMessage(client, xml)
 		if response["status"]<2:
 			print response["message"].message
-			app.jinja_env.globals["twilio"].sendMessage(response["message"])
+			twilio.sendMessage(response["message"])
 		elif response["status"]==2:
 			for message in response["messages"]:
-				app.jinja_env.globals["twilio"].sendMessage(message)
+				twilio.sendMessage(message)
 		elif response["status"]==5:
 			print response["message"]
 	return "Ballots sent"

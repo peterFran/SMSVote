@@ -9,38 +9,35 @@ Copyright (c) 2013 UWE. All rights reserved.
 
 from flask import Flask, request
 from TwilioMessageManager import TwilioMessageManager
-from SMSVoteMachine import SMSVoteMachine
+from SMSVoteState.SMSVoteMachine import SMSVoteMachine
 from Crypto.PublicKey import RSA
 app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
 def receiveMessage():
 	print request.form["From"]
-	for i in  request.form["Body"]:
-		print ord(i)
-	response = app.jinja_env.globals["machine"].receiveMessage(request.form["From"], request.form["Body"])
-	
+	print request.form["Body"]
+	machine = SMSVoteMachine("+441252236305", request.form["From"])
+	twilio = TwilioMessageManager()
+	response = machine.receiveMessage(request.form["Body"])
+	if response["status"]==-1:
+		print "first part of init received"
 	if response["status"]<2:
-		app.jinja_env.globals["twilio"].sendMessage(response["message"])
+		twilio.sendMessage(response["message"])
 	elif response["status"]==2:
 		for message in response["messages"]:
-			app.jinja_env.globals["twilio"].sendMessage(message)
+			twilio.sendMessage(message)
+	elif response['status']==4:
+		print "receiving messages"
 	elif response["status"]==5:
-		receiveCandidates(response["message"])
+		receiveCandidates response["message"]
 
 @app.route("/setup")
 def setup():
 	clientKey = RSA.importKey(open("clientKey.txt","r").read())
 	servPub = open("clientPub.txt","r").read()
 	obj = SMSVoteMachine("+441252236305",clientKey, "abcdefg", [{"telephone":"+442033229681","password":"gfedcba","PK":servPub}])
-	app.jinja_env.globals["machine"] = obj
 	return "Setup complete"
-
-@app.route("/print")
-def yeha():
-	for i in app.jinja_env.globals["machine"].data_store.sessions_dictionary:
-		print i
-	return "yipee"
 
 def receiveCandidates(xml):
 	print xml

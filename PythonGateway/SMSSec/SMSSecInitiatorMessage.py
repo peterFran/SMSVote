@@ -16,24 +16,21 @@ from SMSSec import SMSSecMessage
 from Crypto import Random
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
+import base64
 
 class SMSSecInitiatorMessage(SMSSecMessage):
 	def __init__(self, recipient_telephone, sender_telephone):
 		super(SMSSecInitiatorMessage, self).__init__(recipient_telephone,sender_telephone)
 	
-	def createMessage(self, public_key, booth_password, session_id):
-		random_challenge = Random.new().read(1)
-		key_params = Random.new().read(32)
-		IV = Random.new().read(16)
+	def createMessage(self, public_key, booth_password, session_id, IV, key_params, random_challenge):
 		public_key = RSA.importKey(public_key)
 		hashed_parts = hashlib.sha256(self.sender_telephone+booth_password+"{0:08d}".format(session_id)).digest()
 		message = self.sender_telephone+":"+hashed_parts+key_params+IV+"{0:08d}".format(session_id)+random_challenge
-		self.message = public_key.encrypt(message,32)[0]
-		return {"random_challenge":random_challenge, "iv":IV, "key_params":key_params, "session_id":session_id}
+		self.message = base64.b64encode(public_key.encrypt(message,32)[0])
 	
 	def decryptMessage(self, encrypted_message, booth_password, private_key):
 		private_key =RSA.importKey(private_key)
-		message = private_key.decrypt(encrypted_message)
+		message = private_key.decrypt(base64.b64decode(encrypted_message))
 		telephone, parts = message.split(":",1)
 		session_id = parts[80:88]
 		message_hash = parts[:32]

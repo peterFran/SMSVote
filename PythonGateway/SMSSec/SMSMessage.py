@@ -18,9 +18,22 @@ class SMSMessage(object):
 		self.recipient_telephone = recipient_telephone
 		self.message = None
 	
-	def createMessage(payload):
+	def createMessage(self, payload):
 		self.message = payload
 	
+	def getMessage(self):
+		# Length must not excede 160 NORMAL CHARACTERS. SPECIAL CHARS WILL CAUSE INIHILATION
+		output = []
+		message_body = self.message
+		while len(message_body)>0:
+			size = 160
+			if len(message_body)<size:
+				output.append(message_body)
+				message_body = ""
+			else:
+				output.append(message_body[:size])
+				message_body = message_body[size:]
+		return output
 
 
 class SMSMessageTests(unittest.TestCase):
