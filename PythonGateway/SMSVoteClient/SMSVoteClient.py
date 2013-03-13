@@ -11,6 +11,7 @@ from flask import Flask, request
 from TwilioMessageManager import TwilioMessageManager
 from SMSVoteState.SMSVoteMachine import SMSVoteMachine
 from Crypto.PublicKey import RSA
+import InitialiseClient
 app = Flask(__name__)
 
 @app.route("/", methods=["POST"])
@@ -30,13 +31,11 @@ def receiveMessage():
 	elif response['status']==4:
 		print "receiving messages"
 	elif response["status"]==5:
-		receiveCandidates response["message"]
+		receiveCandidates(response["message"])
 
 @app.route("/setup")
 def setup():
-	clientKey = RSA.importKey(open("clientKey.txt","r").read())
-	servPub = open("clientPub.txt","r").read()
-	obj = SMSVoteMachine("+441252236305",clientKey, "abcdefg", [{"telephone":"+442033229681","password":"gfedcba","PK":servPub}])
+	InitialiseClient.main()
 	return "Setup complete"
 
 def receiveCandidates(xml):

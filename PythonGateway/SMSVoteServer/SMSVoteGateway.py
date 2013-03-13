@@ -13,6 +13,7 @@ from SMSVoteMachine import SMSVoteMachine
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
 from Crypto.PublicKey import RSA
+import InitialiseServer
 app = Flask(__name__)
 
 app.config.update(
@@ -42,9 +43,7 @@ def receiveMessage():
 
 @app.route("/setup")
 def setup():	
-	servkey = RSA.importKey(open("serverKey.txt","r").read())
-	clientPub = open("clientPub.txt","r").read()
-	obj = SMSVoteMachine("+442033229681",servkey, "gfedcba", [{"telephone":"+441252236305","password":"abcdefg","PK":clientPub}])
+	InitialiseServer.main()
 	return "Setup Complete"
 
 @app.route("/send")

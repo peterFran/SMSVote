@@ -55,7 +55,7 @@ class SMSVoteMachine(object):
 				return self.sendMessage(None)
 				
 			# If receiving a responder
-			elif self.data_store.getSessionDetails(self.counterpart_telephone)['receive_sequence']==0:
+			elif self.session.receiveSequence()==0:
 				# decrypt responder
 				responder = SMSSecResponderMessage(self.counterpart_telephone, self.this_telephone)
 				responder.decryptMessage(message_body, self.session.randomChallenge(), self.session.receiveIV(), self.session.key())
@@ -66,8 +66,6 @@ class SMSVoteMachine(object):
 			
 			# If receiving a message
 			else:
-				# Get session details
-				details = self.data_store.getSessionDetails(self.counterpart_telephone)
 				# decrypt message
 				message = SMSSecSequenceMessage(self.this_telephone, self.counterpart_telephone)
 				decrypted_message = message.decryptMessage(message_body, self.session.randomChallenge(), self.session.receiveIV(), self.session.key())
@@ -113,7 +111,6 @@ class SMSVoteMachine(object):
 			elif self.session.sendSequence() == 0 and self.session.receiveSequence() == 1:
 				# Create responder
 				responder = SMSSecResponderMessage(self.counterpart_telephone, self.this_telephone)
-				details = self.data_store.getSessionDetails(self.counterpart_telephone)
 				responder.createMessage(self.session.randomChallenge(), self.session.sendIV(), self.session.key())
 				return {"status":1, "message":responder}
 			
@@ -128,7 +125,7 @@ class SMSVoteMachine(object):
 					messages = []
 					for message in divided_messages:
 						# increment send count
-						smsMessage = SMSSecSequenceMessage(self.counterpart_telephone, self.data_store.this_telephone)
+						smsMessage = SMSSecSequenceMessage(self.counterpart_telephone, self.this_telephone)
 						smsMessage.createMessage(message, self.session.sendSequence(), self.session.sendIV(), self.session.key())
 						messages.append(smsMessage)
 						self.session.incrementSendSequence()
