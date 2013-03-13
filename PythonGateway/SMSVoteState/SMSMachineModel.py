@@ -30,12 +30,12 @@ class SMSMachineModel(object):
 	def addPublicKey(self, telephone, key):
 		c = self.conn.cursor()
 		c.execute("INSERT INTO public_key(telephone, key) VALUES('%s', '%s')" % (telephone, key))
-		c.commit()
+		self.conn.commit()
 	
 	def addPrivateKey(self, telephone, key):
 		c = self.conn.cursor()
 		c.execute("INSERT INTO private_key(telephone, key) VALUES('%s', '%s')" % (telephone, key))
-		c.commit()
+		self.conn.commit()
 	
 	def getPrivateKey(self, telephone):
 		c = self.conn.cursor()
@@ -53,4 +53,5 @@ if __name__ == '__main__':
 	sms = SMSMachineModel("+442033229681", "../SMSVoteServer/gateway.db")
 	#sms.addMachine("+441252236305", "abcdefgh")
 	print sms.getAllClients()
+	print sms.getPrivateKey("+442033229681")
 	

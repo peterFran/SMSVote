@@ -7,6 +7,9 @@ Created by Peter Meckiffe on 2013-03-06.
 Copyright (c) 2013 UWE. All rights reserved.
 """
 
+import sys
+import pprint
+sys.path.append('/Users/petermeckiffe/Desktop/Work/University/UWE/Year 3/Computing Project/ComputingProject/SMSVote/PythonGateway')
 from flask import Flask, request
 from TwilioMessageManager import TwilioMessageManager
 from SMSVoteState.SMSVoteMachine import SMSVoteMachine

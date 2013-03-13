@@ -9,7 +9,7 @@ Copyright (c) 2013 UWE. All rights reserved.
 
 from flask import Flask, request
 from TwilioMessageManager import TwilioMessageManager
-from SMSVoteMachine import SMSVoteMachine
+from SMSVoteState.SMSVoteMachine import SMSVoteMachine
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
 from Crypto.PublicKey import RSA
@@ -67,5 +67,7 @@ def sendBallots():
 
 	
 if __name__ == "__main__":
+	import sys
+	sys.path.append('/Users/petermeckiffe/Desktop/Work/University/UWE/Year\ 3/Computing\ Project/ComputingProject/SMSVote/PythonGateway')
 	app.run(debug=True, port=8000, host='0.0.0.0')
 

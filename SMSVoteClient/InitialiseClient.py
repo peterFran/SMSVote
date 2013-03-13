@@ -13,6 +13,8 @@ import sqlite3
 from Crypto.PublicKey import RSA
 
 def main():
+	import os
+	print os.getcwd()
 	clientkey = RSA.importKey(open("clientKey.txt","r").read())
 	serverPub = open("serverPub.txt","r").read()
 	
@@ -20,7 +22,7 @@ def main():
 	con = sqlite3.connect('./client.db')
 	f = open('../SMSVoteState/DatabaseSchema.sql','r')
 	sql = f.read()
-	con.cursor().executescript(str)
+	con.cursor().executescript(sql)
 	con.commit()
 	
 	# Create Machine Model

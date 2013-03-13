@@ -15,25 +15,27 @@ from Crypto.PublicKey import RSA
 
 
 def main():
-	servkey = RSA.importKey(open("serverKey.txt","r").read())
-	clientPub = open("clientPub.txt","r").read()
+	import os
+	print os.getcwd()
+	server_key = RSA.importKey(open("serverKey.txt","r").read())
+	client_public_key = open("clientPub.txt","r").read()
 	
 	# Reset database
 	con = sqlite3.connect('./gateway.db')
 	f = open('../SMSVoteState/DatabaseSchema.sql','r')
 	sql = f.read()
-	con.cursor().executescript(str)
+	con.cursor().executescript(sql)
 	con.commit()
 	
 	# Create Machine Model
 	machine_model = SMSMachineModel("+442033229681", "./gateway.db")
 	# Load server details
 	machine_model.addMachine("+442033229681", "hgfedcba")
-	machine_model.addPublicKey("+442033229681", servKey.publickey().exportKey())
-	machine_model.addPrivateKey("+442033229681", servKey.exportKey())
+	machine_model.addPublicKey("+442033229681", server_key.publickey().exportKey())
+	machine_model.addPrivateKey("+442033229681", server_key.exportKey())
 	# Load client details
 	machine_model.addMachine("+441252236305", "abcdefgh")
-	machine_model.addPublicKey("+441252236305", clientPub)
+	machine_model.addPublicKey("+441252236305", client_public_key)
 	
 
 
