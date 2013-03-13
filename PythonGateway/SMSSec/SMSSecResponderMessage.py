@@ -7,10 +7,8 @@ Created by Peter Meckiffe on 2013-02-09.
 Copyright (c) 2013 UWE. All rights reserved.
 """
 
-import sys
-import os
-import unittest
-from SMSSec import *
+from SMSSecMessage import *
+from AESCipher import *
 
 
 class SMSSecResponderMessage(SMSSecMessage):

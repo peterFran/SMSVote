@@ -8,8 +8,9 @@ Copyright (c) 2013 UWE. All rights reserved.
 """
 
 from flask import Flask, request
+import sys
+sys.path.append('/Users/petermeckiffe/Desktop/Work/University/UWE/Year 3/Computing Project/ComputingProject/SMSVote/PythonGateway')
 from TwilioMessageManager import TwilioMessageManager
-from SMSVoteState.SMSVoteMachine import SMSVoteMachine
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
 from Crypto.PublicKey import RSA
@@ -26,12 +27,13 @@ app.config.update(
 def receiveMessage():
 	print request.form["From"]
 	print request.form["Body"]
-	machine = SMSVoteMachine("+442033229681", request.form["From"])
+	machine = SMSVoteMachine("+442033229681", request.form["From"], "gateway.db")
 	twilio = TwilioMessageManager()
 	response = machine.receiveMessage(request.form["Body"])
+	machine.conn.close()
 	if response["status"]==-1:
 		print "first part of init received"
-	if response["status"]<2:
+	elif response["status"]<2:
 		twilio.sendMessage(response["message"])
 	elif response["status"]==2:
 		for message in response["messages"]:
@@ -40,21 +42,26 @@ def receiveMessage():
 		print "receiving messages"
 	elif response["status"]==5:
 		print response["message"]
+	return "200"
 
-@app.route("/setup")
 def setup():	
 	InitialiseServer.main()
 	return "Setup Complete"
 
 @app.route("/send")
 def sendBallots():
-	xml = "<person A>"
-	machine = SMSVoteMachine("+442033229681", request.form["From"])
-	machine_model = SMSMachineModel("+442033229681")
+	xml = "<CandidateList>"
+	for i in CandidateList:
+		
+	print xml
+	conn = sqlite3.connect("gateway.db")
+	machine_model = SMSMachineModel("+442033229681", conn)
 	twilio = TwilioMessageManager()
-	
-	for client in machine_model.getAllClients():
-		response = machine.sendMessage(client, xml)
+	clients = machine_model.getAllClients()
+	conn.close()
+	for client in clients:
+		machine = SMSVoteMachine("+442033229681",client , "gateway.db")
+		response = machine.sendMessage(xml)
 		if response["status"]<2:
 			print response["message"].message
 			twilio.sendMessage(response["message"])
@@ -67,7 +74,7 @@ def sendBallots():
 
 	
 if __name__ == "__main__":
-	import sys
-	sys.path.append('/Users/petermeckiffe/Desktop/Work/University/UWE/Year\ 3/Computing\ Project/ComputingProject/SMSVote/PythonGateway')
+	setup()
 	app.run(debug=True, port=8000, host='0.0.0.0')
+	
 

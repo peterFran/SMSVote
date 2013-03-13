@@ -11,10 +11,7 @@ import sys
 import os
 import unittest
 import hashlib
-import SMSSec
-from SMSSec import SMSSecMessage
-from Crypto import Random
-from Crypto.Cipher import AES
+from SMSSecMessage import *
 from Crypto.PublicKey import RSA
 import base64
 

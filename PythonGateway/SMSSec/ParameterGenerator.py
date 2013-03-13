@@ -23,8 +23,10 @@ class ParameterGenerator(object):
 		self.key = generate16ByteKey(self.machine_pass, self.key_params)
 	
 def generate16ByteKey(machine_pass, key_params):
-	x = hashlib.sha256(str(0)+machine_pass+key_params)
+	print "PASS: ", machine_pass
+	print "KEYPARAMS: ", key_params
+	x = hashlib.sha256(str(0)+str(machine_pass)+key_params)
 	for i in range(0,29,1):
-		x = hashlib.sha256(x.hexdigest()+machine_pass+key_params)
+		x = hashlib.sha256(x.hexdigest()+str(machine_pass)+key_params)
 	return x.hexdigest()[0:16]
 	

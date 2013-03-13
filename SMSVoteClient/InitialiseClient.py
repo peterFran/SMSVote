@@ -10,32 +10,33 @@ Copyright (c) 2013 UWE. All rights reserved.
 import sys
 import os
 import sqlite3
+from SMSVoteState.SMSMachineModel import *
 from Crypto.PublicKey import RSA
 
 def main():
 	import os
-	print os.getcwd()
-	clientkey = RSA.importKey(open("clientKey.txt","r").read())
-	serverPub = open("serverPub.txt","r").read()
+	client_key = RSA.importKey(open("clientKey.txt","r").read())
+	server_public_key = open("serverPub.txt","r").read()
 	
 	# Reset database
 	con = sqlite3.connect('./client.db')
-	f = open('../SMSVoteState/DatabaseSchema.sql','r')
+	f = open('/Users/petermeckiffe/Desktop/Work/University/UWE/Year 3/Computing Project/ComputingProject/SMSVote/PythonGateway/SMSVoteState/DatabaseSchema.sql','r')
 	sql = f.read()
 	con.cursor().executescript(sql)
 	con.commit()
 	
 	# Create Machine Model
-	machine_model = SMSMachineModel("+442033229681", "./client.db")
+	server_model = SMSMachineModel("+442033229681",con)
+	client_model = SMSMachineModel("+441252236305", con)
 	
 	# Load server details
-	machine_model.addMachine("+441252236305", "abcdefgh")
-	machine_model.addPublicKey("+441252236305", clientKey.publickey().exportKey())
-	machine_model.addPrivateKey("+441252236305", clientKey.exportKey())
+	client_model.initMachine("abcdefgh")
+	client_model.addPublicKey(client_key.publickey().exportKey())
+	client_model.addPrivateKey(client_key.exportKey())
 	
 	# Load client details
-	machine_model.addMachine("+442033229681", "hgfedcba")
-	machine_model.addPublicKey("+442033229681", serverPub)
+	server_model.initMachine("hgfedcba")
+	server_model.addPublicKey(server_public_key)
 
 
 if __name__ == '__main__':

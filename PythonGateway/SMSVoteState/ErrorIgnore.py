@@ -13,7 +13,7 @@ import unittest
 
 # Decorator to ignore Exceptions
 class ErrorIgnore(object):
-   def __init__(self, errors, errorreturn = "None", errorcall = None):
+   def __init__(self, errors, errorreturn = None, errorcall = None):
       self.errors = errors
       self.errorreturn = errorreturn
       self.errorcall = errorcall
