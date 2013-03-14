@@ -13,8 +13,8 @@ from TwilioMessageManager import TwilioMessageManager
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
 
-@app.route("/sendBallots")
-def sendBallots():
+@app.route("/vote")
+def sendVote():
 	xml = "<CandidateList>"
 	print xml
 	conn = sqlite3.connect("app/static/data/machines.db")
@@ -51,14 +51,20 @@ def receiveMessage():
 	elif response['status']==4:
 		print "receiving messages"
 	elif response["status"]==5:
-		print response["message"]
+		processXML(response["message"])
 	return "200"
 
-@app.route("/addCandidate", methods=["POST"])
-def addCandidate():
-	first_name = request.form["first_name"]
-	last_name =  request.form["last_name"]
-	party = request.form["party"]
+#@app.route("/addCandidate", methods=["POST"])
+# Internal method use only
+def processXML(xml):
+	# get candidates
+	# clear candidates db
+	# add new candidtes
+	
+def addCandidate(candidate):
+	first_name = candidate["first_name"]
+	last_name =  candidate["last_name"]
+	party = candidate["party"]
 	con = sqlite3.connect('./app/static/data/candidates.db')
 	candidate_model  = CandidateModel(con)
 	try:
