@@ -1,0 +1,56 @@
+<html>
+	<head>
+	<title>Candidates</title>
+	<link href="./static/bootstrap/bootstrap/css/bootstrap.css" rel="stylesheet">
+	</head>
+	<body>
+		<div class="container">
+			<div class="masthead">
+				<h3 class="muted">SMSVote</h3>
+				<div class="navbar">
+					<div class="navbar-inner">
+						<div class="container">
+							<ul class="nav">
+								<li class="active"><a href="/candidates">Candidates</a></li>
+								<li><a href="/results">Results</a></li>
+								<li><a href="#">Services</a></li>
+								<li><a href="#">Downloads</a></li>
+								<li><a href="#">About</a></li>
+								<li><a href="#">Contact</a></li>
+							</ul>
+						</div>
+					</div>
+				</div><!-- /.navbar -->
+			</div>
+			<!-- Jumbotron -->
+			<div class="jumbotron">
+				<h1>Candidates</h1>
+				<form method="POST" action="/addCandidate" name="addCandidate">
+				<table class=".table-striped">
+					<tr>
+						<th>Candidate ID</th>
+						<th>First Name</th>
+						<th>Last Name</th>
+						<th>Party</th>
+					</tr>
+					{% for candidate in candidates %}
+					<tr>
+						<td>{{candidate.id}}</td>
+						<td>{{candidate.first_name}}</td>
+						<td>{{candidate.last_name}}</td>
+						<td>{{candidate.party}}</td>
+					</tr>
+					{% endfor %}
+					<tr>
+						<td>Add:</td>
+						<td><input type="text" name="first_name"></input></td>
+						<td><input type="text" name="last_name"></input></td>
+						<td><input type="text" name="party"></input></td>
+					</tr>
+				</table>
+				<button type="submit" >Add Candidate</button>
+				</form>
+			</div>
+		</div>
+  </body>
+</html>
