@@ -10,14 +10,26 @@ Copyright (c) 2013 UWE. All rights reserved.
 import sys
 import sqlite3
 import os
-
+import xml.etree.ElementTree as ET
 
 def main():
 	# Reset database
 	con = sqlite3.connect('./app/static/data/candidates.db')
 	f = open('../PythonGateway/CandidateManagement/CandidateSchema.sql','r')
 	sql = f.read()
+	f.close()
 	con.cursor().executescript(sql)
+	con.commit()
+	f = open('app/static/data/candidates.txt')
+	candidates = ET.fromstring(f.read())
+	candidateslist = candidates._children
+	for cand in candidateslist:
+		child = cand._children
+		print child[0].text
+		print child[1].text
+		print child[2].text
+		con.cursor().execute("INSERT INTO candidate(candidate_number, first_name, last_name, party) VALUES(%d,'%s','%s','%s')" 
+			% (int(cand.attrib["id"]),child[0].text,child[1].text,child[2].text))
 	con.commit()
 
 

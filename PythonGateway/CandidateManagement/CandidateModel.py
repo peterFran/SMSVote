@@ -29,7 +29,10 @@ class CandidateModel(object):
 	
 	def addCandidate(self, first_name, last_name, party):
 		c = self.conn.cursor()
-		c.execute("INSERT INTO candidate(first_name, last_name, party) VALUES('%s','%s','%s')" % (first_name, last_name, party))
+		if party is None:
+			c.execute("INSERT INTO candidate(first_name, last_name) VALUES('%s','%s')" % (first_name, last_name))
+		else:
+			c.execute("INSERT INTO candidate(first_name, last_name, party) VALUES('%s','%s','%s')" % (first_name, last_name, party))
 		self.conn.commit()
 
 if __name__ == '__main__':

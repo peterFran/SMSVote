@@ -2,6 +2,7 @@
 	<head>
 	<title>Candidates</title>
 	<link href="./static/bootstrap/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 	</head>
 	<body>
 		<div class="container">
@@ -11,7 +12,7 @@
 					<div class="navbar-inner">
 						<div class="container">
 							<ul class="nav">
-								<li class="active"><a href="/candidates">Candidates</a></li>
+								<li class="active"><a href="/viewCandidates">Candidates</a></li>
 								<li><a href="/results">Results</a></li>
 								<li><a href="#">Services</a></li>
 								<li><a href="#">Downloads</a></li>
@@ -25,31 +26,33 @@
 			<!-- Jumbotron -->
 			<div class="jumbotron">
 				<h1>Candidates</h1>
-				<form method="POST" action="/addCandidate" name="addCandidate">
-				<table class=".table-striped">
+				<table class="table table-striped">
+					<thead>
 					<tr>
 						<th>Candidate ID</th>
 						<th>First Name</th>
 						<th>Last Name</th>
 						<th>Party</th>
+						<th>Vote</th>
 					</tr>
+					</thead>
+					<tbody>
 					{% for candidate in candidates %}
 					<tr>
-						<td>{{candidate.id}}</td>
-						<td>{{candidate.first_name}}</td>
-						<td>{{candidate.last_name}}</td>
-						<td>{{candidate.party}}</td>
+						<form method="post" action="/vote">
+						<td align="center">{{candidate.attrib['id']}}</td>
+						<td align="center">{{candidate._children[0].text}}</td>
+						<td align="center">{{candidate._children[1].text}}</td>
+						<td align="center">{{candidate._children[2].text}}</td>
+						<td align="center"><input type="submit" value="Cast Vote" class = "btn btn-medium btn-primary"></td>
+						<input type="integer" value="{{candidate.attrib['id']}}" hidden="true">
+						<input type="integer" value="{{user_id}}" hidden="true">
+						
 					</tr>
 					{% endfor %}
-					<tr>
-						<td>Add:</td>
-						<td><input type="text" name="first_name"></input></td>
-						<td><input type="text" name="last_name"></input></td>
-						<td><input type="text" name="party"></input></td>
-					</tr>
+					</tbody>
 				</table>
-				<button type="submit" >Add Candidate</button>
-				</form>
+				
 			</div>
 		</div>
   </body>

@@ -4,5 +4,6 @@ CREATE TABLE candidate (
 candidate_number INTEGER PRIMARY KEY,
 first_name TEXT NOT NULL,
 last_name TEXT NOT NULL,
-party TEXT NOT NULL UNIQUE DEFAULT "Independant"
+party TEXT NOT NULL DEFAULT "Independant",
+UNIQUE(first_name, last_name, party) ON CONFLICT REPLACE
 );

@@ -2,6 +2,7 @@
 	<head>
 	<title>Candidates</title>
 	<link href="./static/bootstrap/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 	</head>
 	<body>
 		<div class="container">
@@ -26,7 +27,7 @@
 			<div class="jumbotron">
 				<h1>Candidates</h1>
 				<form method="POST" action="/addCandidate" name="addCandidate">
-				<table class=".table-striped">
+				<table class="table table-striped">
 					<tr>
 						<th>Candidate ID</th>
 						<th>First Name</th>
@@ -35,10 +36,10 @@
 					</tr>
 					{% for candidate in candidates %}
 					<tr>
-						<td>{{candidate.id}}</td>
-						<td>{{candidate.first_name}}</td>
-						<td>{{candidate.last_name}}</td>
-						<td>{{candidate.party}}</td>
+						<td align="center">{{candidate.attrib['id']}}</td>
+						<td align="center">{{candidate._children[0].text}}</td>
+						<td align="center">{{candidate._children[1].text}}</td>
+						<td align="center">{{candidate._children[2].text}}</td>
 					</tr>
 					{% endfor %}
 					<tr>
@@ -48,8 +49,10 @@
 						<td><input type="text" name="party"></input></td>
 					</tr>
 				</table>
-				<button type="submit" >Add Candidate</button>
+				<input type="submit" value="Add Candidate" class = "btn btn-medium btn-primary">
+				<a href="/sendBallots" class = "btn btn-success">Send Ballots</a>
 				</form>
+				<a href="/saveCandidates" class = "btn btn-medium">Save Candidates to file</a>
 			</div>
 		</div>
   </body>

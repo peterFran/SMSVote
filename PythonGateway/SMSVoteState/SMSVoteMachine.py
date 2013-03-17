@@ -82,7 +82,7 @@ class SMSVoteMachine(object):
 					self.session.addReceivedMessagePart(decrypted_message)
 					return {"status":5,"message":self.session.receivedMessage()}
 				# Otherwise just append
-				self.session.addRecievedMessagePart(decrypted_message)
+				self.session.addReceivedMessagePart(decrypted_message)
 				return {"status":4, "message":self.session.receivedMessage()}
 		#except:
 			#print "Recipient machine isn't registered"

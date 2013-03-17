@@ -7,46 +7,54 @@ Created by Peter Meckiffe on 2013-02-10.
 Copyright (c) 2013 UWE. All rights reserved.
 """
 from app import app
-from flask import request, redirect
+from flask import request, redirect, Response
 from CandidateManagement.CandidateModel import CandidateModel
 from TwilioMessageManager import TwilioMessageManager
+import time
+import xml.etree.ElementTree as ET
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
 
 @app.route("/sendBallots")
 def sendBallots():
-	xml = "<CandidateList>"
-	print xml
+	# Get candidates list as XML string
+	xml = candidates().response[0]
+	# Connect to DB containing client data
 	conn = sqlite3.connect("app/static/data/machines.db")
 	machine_model = SMSMachineModel("+442033229681", conn)
+	# Init message sender
 	twilio = TwilioMessageManager()
+	# Get client tel numbers
 	clients = machine_model.getAllClients()
 	conn.close()
+	
+	# For each client send the candidate list
 	for client in clients:
+		# Create a voting machine object for sending/receiveing messages
 		machine = SMSVoteMachine("+442033229681",client , "app/static/data/machines.db")
+		# Create the message instance
 		response = machine.sendMessage(xml)
-		if response["status"]<2:
-			print response["message"].message
-			twilio.sendMessage(response["message"])
-		elif response["status"]==2:
-			for message in response["messages"]:
-				twilio.sendMessage(message)
-		elif response["status"]==5:
-			print response["message"]
-	return "Ballots sent"
+		# Send the message
+		twilio.sendMessage(response["message"])
+	return redirect("/viewCandidates")
 
 @app.route("/", methods=["POST"])
 def receiveMessage():
+	# Create a voting machine instance to decrypt/encrypt messages messages
 	machine = SMSVoteMachine("+442033229681", request.form["From"], "app/static/data/machines.db")
+	# Init message sender
 	twilio = TwilioMessageManager()
+	# Create message object
 	response = machine.receiveMessage(request.form["Body"])
 	machine.conn.close()
+	# Depending on stage of message exchange do one of the following
 	if response["status"]==-1:
 		print "first part of init received"
 	elif response["status"]<2:
 		twilio.sendMessage(response["message"])
 	elif response["status"]==2:
 		for message in response["messages"]:
+			time.sleep(5)
 			twilio.sendMessage(message)
 	elif response['status']==4:
 		print "receiving messages"
@@ -59,14 +67,47 @@ def addCandidate():
 	first_name = request.form["first_name"]
 	last_name =  request.form["last_name"]
 	party = request.form["party"]
+	if len(first_name) is not 0 and len(last_name) is not 0:
+		if len(party) is 0:
+			party = None
+		
+		con = sqlite3.connect('./app/static/data/candidates.db')
+		candidate_model  = CandidateModel(con)
+		try:
+			candidate_model.addCandidate(first_name, last_name, party)
+		except:
+			pass
+	return redirect("/viewCandidates")
+
+@app.route("/saveCandidates", methods=["GET"])
+def saveCandidates():
+	f = open("app/static/data/candidates.txt","w")
+	f.write(candidates().response[0])
+	f.close()
+	return redirect("/viewCandidates")
+	
+@app.route("/candidates", methods=["GET"])
+def candidates():
+	"""Display a table of candidates retrieved from the database"""
 	con = sqlite3.connect('./app/static/data/candidates.db')
 	candidate_model  = CandidateModel(con)
-	try:
-		candidate_model.addCandidate(first_name, last_name, party)
-	except:
-		pass
-	return redirect("/candidates")
-
+	candidates = candidate_model.getAllCandidates()
+	con.close()
+	
+	root = ET.Element('CandidateList')
+	for candidate in candidates:
+		#Create a child element
+		candidate_element = ET.Element('candidate')
+		candidate_element.attrib["id"] = unicode(candidate["id"])
+		#Create candidate fields
+		first_name = ET.SubElement(candidate_element,"first_name")
+		last_name = ET.SubElement(candidate_element,"last_name")
+		party = ET.SubElement(candidate_element,"party")
+		first_name.text = candidate["first_name"]
+		last_name.text = candidate["last_name"]
+		party.text = candidate["party"]
+		root.append(candidate_element)
+	return Response("<?xml version=\"1.0\" encoding=\"utf-8\"?>"+ET.tostring(root), mimetype="text/xml")
 
 
 
