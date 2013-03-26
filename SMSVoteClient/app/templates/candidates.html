@@ -14,8 +14,6 @@
 							<ul class="nav">
 								<li class="active"><a href="/viewCandidates">Candidates</a></li>
 								<li><a href="/results">Results</a></li>
-								<li><a href="#">Services</a></li>
-								<li><a href="#">Downloads</a></li>
 								<li><a href="#">About</a></li>
 								<li><a href="#">Contact</a></li>
 							</ul>
@@ -40,14 +38,14 @@
 					{% for candidate in candidates %}
 					<tr>
 						<form method="post" action="/vote">
-						<td align="center">{{candidate.attrib['id']}}</td>
-						<td align="center">{{candidate._children[0].text}}</td>
-						<td align="center">{{candidate._children[1].text}}</td>
-						<td align="center">{{candidate._children[2].text}}</td>
-						<td align="center"><input type="submit" value="Cast Vote" class = "btn btn-medium btn-primary"></td>
-						<input type="integer" value="{{candidate.attrib['id']}}" hidden="true">
-						<input type="integer" value="{{user_id}}" hidden="true">
-						
+							<td align="center">{{candidate['id']}}</td>
+							<td align="center">{{candidate['first_name']}}</td>
+							<td align="center">{{candidate['last_name']}}</td>
+							<td align="center">{{candidate['party']}}</td>
+							<td align="center"><input type="submit" value="Cast Vote" class = "btn btn-medium btn-primary"></td>
+							<input type="integer" value="{{candidate.attrib['id']}}" hidden="true">
+							<input type="integer" value="{{user_id}}" hidden="true">
+						</form>
 					</tr>
 					{% endfor %}
 					</tbody>

@@ -6,8 +6,7 @@ import services
 @app.route('/viewCandidates')
 def candidates():
 	"""Display a table of candidates retrieved from the database"""
-	candidatesXML = services.candidates().response[0]
-	candidates = ET.fromstring(candidatesXML)
-	candidateslist = candidates._children
+	candidates = services.candidates()
+
 	return render_template("candidates.html",
-		candidates = candidateslist)
+		candidates = candidates)

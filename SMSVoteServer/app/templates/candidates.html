@@ -14,8 +14,6 @@
 							<ul class="nav">
 								<li class="active"><a href="/candidates">Candidates</a></li>
 								<li><a href="/results">Results</a></li>
-								<li><a href="#">Services</a></li>
-								<li><a href="#">Downloads</a></li>
 								<li><a href="#">About</a></li>
 								<li><a href="#">Contact</a></li>
 							</ul>
@@ -36,10 +34,10 @@
 					</tr>
 					{% for candidate in candidates %}
 					<tr>
-						<td align="center">{{candidate.attrib['id']}}</td>
-						<td align="center">{{candidate._children[0].text}}</td>
-						<td align="center">{{candidate._children[1].text}}</td>
-						<td align="center">{{candidate._children[2].text}}</td>
+						<td align="center">{{candidate['id']}}</td>
+						<td align="center">{{candidate['first_name']}}</td>
+						<td align="center">{{candidate['last_name']}}</td>
+						<td align="center">{{candidate['party']}}</td>
 					</tr>
 					{% endfor %}
 					<tr>
@@ -51,6 +49,9 @@
 				</table>
 				<input type="submit" value="Add Candidate" class = "btn btn-medium btn-primary">
 				<a href="/sendBallots" class = "btn btn-success">Send Ballots</a>
+				<a href="/startElection" class = "btn btn-success">Start Election</a>
+				<a href="/clear" class = "btn btn-success">Clear</a>
+				<a href="/testFormat" class = "btn btn-success">Test Format</a>
 				</form>
 				<a href="/saveCandidates" class = "btn btn-medium">Save Candidates to file</a>
 			</div>

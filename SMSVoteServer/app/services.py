@@ -11,6 +11,7 @@ from flask import request, redirect, Response
 from CandidateManagement.CandidateModel import CandidateModel
 from TwilioMessageManager import TwilioMessageManager
 import time
+import json
 import xml.etree.ElementTree as ET
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
@@ -18,7 +19,7 @@ from SMSVoteState.SMSVoteMachine import *
 @app.route("/sendBallots")
 def sendBallots():
 	# Get candidates list as XML string
-	xml = candidates().response[0]
+	cands = candidates()
 	# Connect to DB containing client data
 	conn = sqlite3.connect("app/static/data/machines.db")
 	machine_model = SMSMachineModel("+442033229681", conn)
@@ -33,10 +34,36 @@ def sendBallots():
 		# Create a voting machine object for sending/receiveing messages
 		machine = SMSVoteMachine("+442033229681",client , "app/static/data/machines.db")
 		# Create the message instance
-		response = machine.sendMessage(xml)
+		response = machine.sendMessage(json.dumps(cands))
 		# Send the message
 		twilio.sendMessage(response["message"])
 	return redirect("/viewCandidates")
+
+@app.route("/testFormat")
+def testXmlVsJson():
+	candidates = [{"id":1,"first_name":"aaaaa","last_name":"aaaaa","party":"aaaaa"}]
+	for i in range(1, 16):
+		candidatelist = candidates*i
+		#print candidates
+		print str(i)+"\t"+str(len(divideMessage(xmlConvert(candidatelist),0)))+ "\t" +str(len(divideMessage(jsonConvert(candidatelist),0)))
+	print "\n"
+	candidates = [{"id":1,"first_name":"a","last_name":"a","party":"a"}]
+	for i in range(1,11):
+		candidates[0]['first_name']+="a"
+		candidates[0]['last_name']+="a"
+		candidates[0]['party']+="a"
+		candidatelist = candidates*7
+		#print candidates
+		print str(i)+"\t"+str(len(divideMessage(xmlConvert(candidatelist),0)))+ "\t" +str(len(divideMessage(jsonConvert(candidatelist),0)))
+	import views
+	return views.candidates()
+
+@app.route("/clear")
+def clearCandidates():
+	import initCandidates
+	initCandidates.main()
+	import views
+	return views.candidates()
 
 @app.route("/", methods=["POST"])
 def receiveMessage():
@@ -82,18 +109,11 @@ def addCandidate():
 @app.route("/saveCandidates", methods=["GET"])
 def saveCandidates():
 	f = open("app/static/data/candidates.txt","w")
-	f.write(candidates().response[0])
+	f.write(json.dumps(candidates()))
 	f.close()
 	return redirect("/viewCandidates")
 	
-@app.route("/candidates", methods=["GET"])
-def candidates():
-	"""Display a table of candidates retrieved from the database"""
-	con = sqlite3.connect('./app/static/data/candidates.db')
-	candidate_model  = CandidateModel(con)
-	candidates = candidate_model.getAllCandidates()
-	con.close()
-	
+def xmlConvert(candidates):
 	root = ET.Element('CandidateList')
 	for candidate in candidates:
 		#Create a child element
@@ -107,7 +127,22 @@ def candidates():
 		last_name.text = candidate["last_name"]
 		party.text = candidate["party"]
 		root.append(candidate_element)
-	return Response("<?xml version=\"1.0\" encoding=\"utf-8\"?>"+ET.tostring(root), mimetype="text/xml")
+	return "<?xml version=\"1.0\" encoding=\"utf-8\"?>"+ET.tostring(root)
+	
+def jsonConvert(candidates):
+	return json.dumps(candidates)
+	
+
+@app.route("/candidates", methods=["GET"])
+def candidates():
+	"""Display a table of candidates retrieved from the database"""
+	con = sqlite3.connect('./app/static/data/candidates.db')
+	candidate_model  = CandidateModel(con)
+	candidates = candidate_model.getAllCandidates()
+	con.close()
+	return candidates
+	
+	
 
 
 

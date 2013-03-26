@@ -127,7 +127,7 @@ class SMSVoteMachine(object):
 				if message_body is not None:
 					# Divide message
 					message_body+="END"
-					divided_messages = self.divideMessage(message_body, self.session.sendSequence())
+					divided_messages = divideMessage(message_body, self.session.sendSequence())
 					messages = []
 					for message in divided_messages:
 						# increment send count
@@ -149,20 +149,20 @@ class SMSVoteMachine(object):
 	def __exit__(self, type, value, traceback):
 		self.conn.close()
 	
-	def divideMessage(self, message_body, first_sq):
-		# Length must not excede 94 NORMAL CHARACTERS. SPECIAL CHARS WILL CAUSE INIHILATION
-		output = []
-		count = first_sq
-		while len(message_body)>0:
-			size = 95 - len(str(count))
-			if len(message_body)<size:
-				output.append(message_body)
-				message_body = ""
-			else:
-				output.append(message_body[:size])
-				message_body = message_body[size:]
-				count += 1
-		return output
+def divideMessage(message_body, first_sq):
+	# Length must not excede 94 NORMAL CHARACTERS. SPECIAL CHARS WILL CAUSE INIHILATION
+	output = []
+	count = first_sq
+	while len(message_body)>0:
+		size = 95 - len(str(count))
+		if len(message_body)<size:
+			output.append(message_body)
+			message_body = ""
+		else:
+			output.append(message_body[:size])
+			message_body = message_body[size:]
+			count += 1
+	return output
 	
 
 if __name__ == '__main__':
