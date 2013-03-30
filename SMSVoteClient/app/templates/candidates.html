@@ -12,8 +12,8 @@
 					<div class="navbar-inner">
 						<div class="container">
 							<ul class="nav">
-								<li class="active"><a href="/viewCandidates">Candidates</a></li>
-								<li><a href="/results">Results</a></li>
+								<li class="active"><a href="/vote">Candidates</a></li>
+								<li><a href="#">Results</a></li>
 								<li><a href="#">About</a></li>
 								<li><a href="#">Contact</a></li>
 							</ul>
@@ -23,7 +23,7 @@
 			</div>
 			<!-- Jumbotron -->
 			<div class="jumbotron">
-				<h1>Candidates</h1>
+				<h1>Welcome {{voter["first_name"]}} {{voter["last_name"]}}</h1>
 				<table class="table table-striped">
 					<thead>
 					<tr>
@@ -37,14 +37,14 @@
 					<tbody>
 					{% for candidate in candidates %}
 					<tr>
-						<form method="post" action="/vote">
+						<form method="post" action="/sendSMS">
 							<td align="center">{{candidate['id']}}</td>
 							<td align="center">{{candidate['first_name']}}</td>
 							<td align="center">{{candidate['last_name']}}</td>
 							<td align="center">{{candidate['party']}}</td>
 							<td align="center"><input type="submit" value="Cast Vote" class = "btn btn-medium btn-primary"></td>
-							<input type="integer" value="{{candidate.attrib['id']}}" hidden="true">
-							<input type="integer" value="{{user_id}}" hidden="true">
+							<input type="integer" value="{{candidate['id']}}" name="candidate_id" hidden="true">
+							<input type="integer" value="{{voter['voter_id']}}" name="voter_id" hidden="true">
 						</form>
 					</tr>
 					{% endfor %}

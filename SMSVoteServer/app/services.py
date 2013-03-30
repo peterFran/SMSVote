@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
 
+
 @app.route("/sendBallots")
 def sendBallots():
 	# Get candidates list as XML string
@@ -39,10 +40,16 @@ def sendBallots():
 		twilio.sendMessage(response["message"])
 	return redirect("/viewCandidates")
 
+@app.route("/createElection" methods=["POST"])
+def createElection():
+	request.form["election_name"]
+	request.form["time_start"]
+	request.form["time_end"]
+
 @app.route("/testFormat")
 def testXmlVsJson():
 	candidates = [{"id":1,"first_name":"aaaaa","last_name":"aaaaa","party":"aaaaa"}]
-	for i in range(1, 16):
+	for i in range(1, 31):
 		candidatelist = candidates*i
 		#print candidates
 		print str(i)+"\t"+str(len(divideMessage(xmlConvert(candidatelist),0)))+ "\t" +str(len(divideMessage(jsonConvert(candidatelist),0)))
@@ -111,7 +118,7 @@ def saveCandidates():
 	f = open("app/static/data/candidates.txt","w")
 	f.write(json.dumps(candidates()))
 	f.close()
-	return redirect("/viewCandidates")
+	return redirect("/candidates")
 	
 def xmlConvert(candidates):
 	root = ET.Element('CandidateList')
@@ -132,8 +139,6 @@ def xmlConvert(candidates):
 def jsonConvert(candidates):
 	return json.dumps(candidates)
 	
-
-@app.route("/candidates", methods=["GET"])
 def candidates():
 	"""Display a table of candidates retrieved from the database"""
 	con = sqlite3.connect('./app/static/data/candidates.db')

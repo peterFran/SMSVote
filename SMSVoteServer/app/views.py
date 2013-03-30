@@ -3,7 +3,7 @@ from flask import render_template
 import xml.etree.ElementTree as ET
 import services
 # View for displaying candidates
-@app.route('/viewCandidates')
+@app.route('/candidates')
 def candidates():
 	"""Display a table of candidates retrieved from the database"""
 	candidates = services.candidates()

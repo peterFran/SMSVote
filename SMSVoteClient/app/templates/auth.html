@@ -1,0 +1,41 @@
+<html>
+	<head>
+	<title>Candidates</title>
+	<link href="./static/bootstrap/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	</head>
+	<body>
+		<div class="container">
+			<div class="masthead">
+				<h3 class="muted">SMSVote</h3>
+				<div class="navbar">
+					<div class="navbar-inner">
+						<div class="container">
+							<ul class="nav">
+								<li class="active"><a href="/vote">Vote</a></li>
+								<li><a href="#">Results</a></li>
+								<li><a href="#">About</a></li>
+								<li><a href="#">Contact</a></li>
+							</ul>
+						</div>
+					</div>
+				</div><!-- /.navbar -->
+			</div>
+			<!-- Jumbotron -->
+			<div class="jumbotron">
+				
+				<h1>Authenticate</h1>
+				<div class="well">
+				<form method="POST" action="/authenticate">
+					<fieldset>
+						<legend>Confirm Voter Identification</legend>
+						<label>Voter ID Number:</label>
+						<input type="text" name="voter_id" placeholder="Voter ID">
+						<button type="submit" class="btn">Sign In</button>
+					</fieldset>
+				</form>
+				</div>
+			</div>
+		</div>
+  </body>
+</html>

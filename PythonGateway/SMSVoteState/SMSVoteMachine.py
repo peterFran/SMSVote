@@ -80,7 +80,9 @@ class SMSVoteMachine(object):
 				if decrypted_message[-3:] == "END":
 					decrypted_message=decrypted_message.rstrip("END")
 					self.session.addReceivedMessagePart(decrypted_message)
-					return {"status":5,"message":self.session.receivedMessage()}
+					finished_message = {"status":5,"message":self.session.receivedMessage()}
+					self.session.terminate()
+					return finished_message
 				# Otherwise just append
 				self.session.addReceivedMessagePart(decrypted_message)
 				return {"status":4, "message":self.session.receivedMessage()}
@@ -135,6 +137,7 @@ class SMSVoteMachine(object):
 						smsMessage.createMessage(message, self.session.sendSequence(), self.session.sendIV(), self.session.key())
 						messages.append(smsMessage)
 						self.session.incrementSendSequence()
+					self.session.terminate()
 					self.conn.close()
 					return {"status":2, "messages":messages}
 					# return message

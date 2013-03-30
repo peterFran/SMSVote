@@ -12,16 +12,19 @@ from CandidateManagement.CandidateModel import CandidateModel
 from TwilioMessageManager import TwilioMessageManager
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
+from VoterMgt.VoterMgt import *
 import xml.etree.ElementTree as ET
 
-@app.route("/vote")
+@app.route("/sendSMS")
 def sendVote():
+	message = {"voter_id":request.form["voter_id"], "candidate_id":request.form["voter_id"]}
+	message = json.dumps(message)
 	conn = sqlite3.connect("app/static/data/machines.db")
 	machine_model = SMSMachineModel("+442033229681", conn)
 	twilio = TwilioMessageManager()
 	conn.close()
 	machine = SMSVoteMachine("+441252236305","+442033229681" , "app/static/data/machines.db")
-	response = machine.sendMessage(xml)
+	response = machine.sendMessage(message)
 	if response["status"]<2:
 		print response["message"].message
 		twilio.sendMessage(response["message"])
@@ -31,6 +34,18 @@ def sendVote():
 	elif response["status"]==5:
 		print response["message"]
 	return "Vote sent"
+
+@app.route("/authenticate", methods=["POST"])
+def authenticate():
+	conn = sqlite3.connect("app/static/data/voters.db")
+	
+	voter_mgt = VoterMgt(conn)
+	voter = voter_mgt.getVoter(int(request.form["voter_id"]))
+	import views
+	if voter is None:
+		return views.error()
+	else:
+		return views.candidates(voter)
 
 @app.route("/", methods=["POST"])
 def receiveMessage():
@@ -49,12 +64,12 @@ def receiveMessage():
 	elif response['status']==4:
 		print response["message"]
 	elif response["status"]==5:
-		processJSON(response["message"])
+		processCandidates(response["message"])
 	return "200"
 
 #@app.route("/addCandidate", methods=["POST"])
 # Internal method use only
-def processJSON(json):
+def processCandidates(json):
 	# get candidates
 	# clear candidates db
 	con = sqlite3.connect('./app/static/data/candidates.db')
@@ -72,7 +87,6 @@ def processJSON(json):
 			% (candidate['id'],candidate['first_name'],candidate['last_name'],candidate['party']))
 	con.commit()
 	
-@app.route("/candidates", methods=["GET"])
 def candidates():
 	"""Display a table of candidates retrieved from the database"""
 	con = sqlite3.connect('./app/static/data/candidates.db')
