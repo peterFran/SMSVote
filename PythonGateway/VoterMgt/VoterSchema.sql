@@ -1,7 +1,0 @@
-DROP TABLE IF EXISTS voter;
-
-CREATE TABLE voter (
-voter_id INTEGER PRIMARY KEY ON CONFLICT REPLACE,
-first_name TEXT NOT NULL,
-last_name TEXT NOT NULL
-);

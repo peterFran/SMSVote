@@ -15,6 +15,8 @@ import json
 import xml.etree.ElementTree as ET
 from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
+from ElectionMgt.ElectionMgt import *
+from ElectionMgt.PersonMgt import *
 
 
 @app.route("/sendBallots")

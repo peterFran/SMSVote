@@ -11,6 +11,7 @@ import sys
 import sqlite3
 import os
 import json
+import 
 def main():
 	# Reset database
 	con = sqlite3.connect('./app/static/data/candidates.db')
@@ -26,7 +27,7 @@ def main():
 		
 			for candidate in candidates:
 				con.cursor().execute("INSERT INTO candidate(candidate_number, first_name, last_name, party) VALUES(%d,'%s','%s','%s')" 
-					% (int(candidate.attrib["id"]),candidate['first_name'],candidate['last_name'],candidate['party']))
+					% (int(candidate["id"]),candidate['first_name'],candidate['last_name'],candidate['party']))
 		except:
 			print "no candidates"
 	con.commit()
