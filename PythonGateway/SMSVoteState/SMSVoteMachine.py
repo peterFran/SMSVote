@@ -72,20 +72,30 @@ class SMSVoteMachine(object):
 			else:
 				# decrypt message
 				message = SMSSecSequenceMessage(self.this_telephone, self.counterpart_telephone)
-				decrypted_message = message.decryptMessage(message_body, self.session.receiveSequence(), self.session.receiveIV(), self.session.key())
-				# increment recieved count
-				self.session.incrementReceiveSequence()
-				# append message to the store
-				# If message is last, append to store then return
-				if decrypted_message[-3:] == "END":
-					decrypted_message=decrypted_message.rstrip("END")
+				try:
+					decrypted_message = message.decryptMessage(message_body, self.session.receiveSequence(), self.session.receiveIV(), self.session.key())
+				except:
+					self.counterpart.addInitiatorPart(message_body)
+					# increment recieved count
+					self.session.incrementReceiveSequence()
+					# append message to the store
+					# If message is last, append to store then return
+					if decrypted_message[-3:] == "END":
+						decrypted_message=decrypted_message.rstrip("END")
+						self.session.addReceivedMessagePart(decrypted_message)
+						finished_message = {"status":5,"message":self.session.receivedMessage()}
+						self.session.terminate()
+						return finished_message
+					# Otherwise just append
 					self.session.addReceivedMessagePart(decrypted_message)
-					finished_message = {"status":5,"message":self.session.receivedMessage()}
-					self.session.terminate()
-					return finished_message
-				# Otherwise just append
-				self.session.addReceivedMessagePart(decrypted_message)
-				return {"status":4, "message":self.session.receivedMessage()}
+					
+					# Check no messages left behind
+					stored_message = self.counterpart.getInitiatorPart()
+					if first_part is not None:
+						status = receiveMessage(stored_message)
+						self.counterpart.wipeInitiatorPart()
+						return status
+					return {"status":4, "message":self.session.receivedMessage()}
 		#except:
 			#print "Recipient machine isn't registered"
 	
