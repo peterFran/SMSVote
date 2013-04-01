@@ -64,6 +64,8 @@ def receiveMessage():
 	machine.conn.close()
 	if response["status"]==-1:
 		print "INITIATOR PART 1 RECEIVED"
+	elif response["status"]==-2:
+		print "Message failed, stored"
 	elif response["status"]<2:
 		twilio.sendMessage(response["message"])
 	elif response["status"]==2:

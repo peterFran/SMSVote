@@ -21,10 +21,3 @@ class TwilioMessageManager(object):
 			time.sleep(0)
 			print twi_message.sid
 	
-if __name__=="__main__":
-	from Crypto import Random
-	rd = Random.new().read(4)
-	tw = TwilioMessageManager()
-	twi_message = tw.client.sms.messages.create(body=rd,
-		to="+441252236305",
-		from_="+442033229681")

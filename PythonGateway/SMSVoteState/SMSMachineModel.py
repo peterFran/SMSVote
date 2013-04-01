@@ -31,6 +31,7 @@ class SMSMachineModel(object):
 		c = self.conn.cursor()
 		return c.execute("SELECT part_init FROM machine WHERE telephone='%s'" % self.this_telephone).fetchone()[0]
 	
+	
 	def addInitiatorPart(self, part):
 		c = self.conn.cursor()
 		c.execute("UPDATE machine SET part_init='%s' WHERE telephone='%s'" % (part, self.this_telephone))
