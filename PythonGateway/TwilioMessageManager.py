@@ -6,7 +6,7 @@ TwilioMessageDispatcher.py
 Created by Peter Meckiffe on 2013-02-05.
 Copyright (c) 2013 UWE. All rights reserved.
 """
-
+import time
 from twilio.rest import TwilioRestClient
 
 class TwilioMessageManager(object):
@@ -18,6 +18,7 @@ class TwilioMessageManager(object):
 			twi_message = self.client.sms.messages.create(body=mes,
 				to=message.recipient_telephone,
 				from_=message.sender_telephone)
+			time.sleep(0)
 			print twi_message.sid
 	
 if __name__=="__main__":

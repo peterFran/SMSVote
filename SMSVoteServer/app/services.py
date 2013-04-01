@@ -15,6 +15,7 @@ from SMSVoteState.SMSMachineModel import *
 from SMSVoteState.SMSVoteMachine import *
 from ElectionMgt.ElectionMgt import *
 from ElectionMgt.PersonMgt import *
+import xml.etree.ElementTree as ET
 
 
 @app.route("/sendBallots")
@@ -64,6 +65,54 @@ def removeCandidate():
 	import views
 	return redirect("/candidates")
 
+@app.route("/testFormat")
+def testXmlVsJson():
+	candidates = [{"id":1,"first_name":"aaaaa","last_name":"aaaaa","party":"aaaaa"}]
+	for i in range(1, 31):
+		candidatelist = candidates*i
+		message = {"election_id":1,"candidate_list":candidatelist}
+		#print candidates
+		print str(i)+"\t"+str(len(divideMessage(xmlConvert(message),0)))+ "\t" +str(len(divideMessage(jsonConvert(message),0)))
+	print "\n"
+	candidates = [{"id":1,"first_name":"a","last_name":"a","party":"a"}]
+	for i in range(1,11):
+		candidates[0]['first_name']+="a"
+		candidates[0]['last_name']+="a"
+		candidates[0]['party']+="a"
+		candidatelist = candidates*7
+		message = {"election_id":1,"candidate_list":candidatelist}
+		#print candidates
+		print str(i)+"\t"+str(len(divideMessage(xmlConvert(message),0)))+ "\t" +str(len(divideMessage(jsonConvert(message),0)))
+	import views
+	return views.candidates()
+
+
+def xmlConvert(candidates):
+	root = ET.Element('Candidates')
+	election_id_element = ET.Element('election_id')
+	election_id_element.attrib["election_id"] = unicode(candidates["election_id"])
+	root.append(election_id_element)
+	candidate_list_element = ET.Element('candidate_list')
+	for candidate in candidates["candidate_list"]:
+		#Create a child element
+		candidate_element = ET.Element('candidate')
+		candidate_element.attrib["id"] = unicode(candidate["id"])
+		#Create candidate fields
+		first_name = ET.SubElement(candidate_element,"first_name")
+		last_name = ET.SubElement(candidate_element,"last_name")
+		party = ET.SubElement(candidate_element,"party")
+		first_name.text = candidate["first_name"]
+		last_name.text = candidate["last_name"]
+		party.text = candidate["party"]
+		candidate_list_element.append(candidate_element)
+	root.append(candidate_list_element)
+	message = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"+ET.tostring(root)
+	#print message
+	return message
+
+def jsonConvert(candidates):
+	return json.dumps(candidates)
+
 
 @app.route("/", methods=["POST"])
 def receiveMessage():
@@ -81,7 +130,6 @@ def receiveMessage():
 		twilio.sendMessage(response["message"])
 	elif response["status"]==2:
 		for message in response["messages"]:
-			time.sleep(5)
 			twilio.sendMessage(message)
 	elif response['status']==4:
 		print "receiving messages"

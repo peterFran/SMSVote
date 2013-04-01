@@ -33,9 +33,7 @@ class SMSMachineModel(object):
 	
 	def addInitiatorPart(self, part):
 		c = self.conn.cursor()
-		print "adding"
 		c.execute("UPDATE machine SET part_init='%s' WHERE telephone='%s'" % (part, self.this_telephone))
-		"added %s" %part
 		self.conn.commit()
 	
 	def wipeInitiatorPart(self):
