@@ -51,10 +51,19 @@ def sendSMS(message, client):
 
 @app.route("/clear")
 def clearCandidates():
-	import initCandidates
-	initCandidates.main()
+	import initElection
+	initElection.main()
 	import views
-	return views.candidates()
+	return redirect("/candidates")
+
+@app.route("/removeCandidate", methods=["POST"])
+def removeCandidate():
+	con = sqlite3.connect('./app/static/data/election.db')
+	person_mgt = PersonMgt(con)
+	person_mgt.clearCandidate(int(request.form["candidate_id"]),1)
+	import views
+	return redirect("/candidates")
+
 
 @app.route("/", methods=["POST"])
 def receiveMessage():

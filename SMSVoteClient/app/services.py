@@ -63,7 +63,7 @@ def receiveMessage():
 	response = machine.receiveMessage(request.form["Body"])
 	machine.conn.close()
 	if response["status"]==-1:
-		print "first part of init received"
+		print "INITIATOR PART 1 RECEIVED"
 	elif response["status"]<2:
 		twilio.sendMessage(response["message"])
 	elif response["status"]==2:
@@ -97,7 +97,15 @@ def processCandidates(plain_message):
 		print candidate['candidate_id'],"\t",candidate['first_name'],"\t",candidate['last_name'],"\t", candidate['party']
 		person_id = person_mgt.addPerson(candidate['first_name'],candidate['last_name'], check=False)
 		candidate_id = person_mgt.makeCandidate(person_id, election_id, candidate['party'], candidate_id=candidate['candidate_id'])
+	# Save candidates to file
+	saveCandidates(1)
 	
+
+def saveCandidates(election_id):
+	f = open("app/static/data/candidates.txt","w")
+	f.write(json.dumps(candidates(election_id=election_id)))
+	f.close()
+	return redirect("/candidates")
 
 def printConfirmation(message):
 	if "error" in message:
@@ -108,11 +116,14 @@ def printConfirmation(message):
 			print "%s: %s" % (i, message[i])
 	
 
-def candidates():
+def candidates(election_id=1):
 	"""Display a table of candidates retrieved from the database"""
 	con = sqlite3.connect('./app/static/data/election.db')
 	candidate_model  = PersonMgt(con)
-	candidates = candidate_model.getCandidates(1)
+	candidates = candidate_model.getCandidates(election_id)
+	for candidate in candidates:
+		del(candidate["person_id"])
+		del(candidate["election_id"])
 	con.close()
 	return candidates
 

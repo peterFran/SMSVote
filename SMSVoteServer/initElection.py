@@ -27,11 +27,13 @@ def main():
 	election_id = election_mgt.createElection("President of Nigeria", datetime.now(), datetime.now()+timedelta(days=1), election_id = 1)
 	filename = 'app/static/data/candidates.txt'
 	with open(filename, 'r') as f:
-		candidates = json.loads(f.read())
-		person_mgt = PersonMgt(con)
-		for candidate in candidates:
-			person_id = person_mgt.addPerson(candidate["first_name"], candidate["last_name"])
-			print person_mgt.makeCandidate(person_id, election_id,candidate["party"], candidate_id=candidate["candidate_id"])
+		contents = f.read()
+		if len(contents) is not 0:
+			candidates = json.loads(contents)
+			person_mgt = PersonMgt(con)
+			for candidate in candidates:
+				person_id = person_mgt.addPerson(candidate["first_name"], candidate["last_name"])
+				print person_mgt.makeCandidate(person_id, election_id, candidate["party"], candidate_id=candidate["candidate_id"]),"\t%s\t%s\t%s" % (candidate["first_name"],candidate["last_name"],candidate["party"])
 
 
 if __name__ == '__main__':

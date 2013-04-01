@@ -24,22 +24,30 @@
 			<!-- Jumbotron -->
 			<div class="jumbotron">
 				<h1>Candidates</h1>
-				<form method="POST" action="/addCandidate" name="addCandidate">
+				
 				<table class="table table-striped">
 					<tr>
 						<th>Candidate ID</th>
 						<th>First Name</th>
 						<th>Last Name</th>
 						<th>Party</th>
+						<th>Remove</th>
 					</tr>
 					{% for candidate in candidates %}
 					<tr>
-						<td align="center">{{candidate['candidate_id']}}</td>
-						<td align="center">{{candidate['first_name']}}</td>
-						<td align="center">{{candidate['last_name']}}</td>
-						<td align="center">{{candidate['party']}}</td>
+						<form action="/removeCandidate" method="POST">
+							<td align="center">{{candidate['candidate_id']}}</td>
+							<td align="center">{{candidate['first_name']}}</td>
+							<td align="center">{{candidate['last_name']}}</td>
+							<td align="center">{{candidate['party']}}</td>
+							<td align="center">
+								<input type="hidden" name="candidate_id" value="{{candidate['candidate_id']}}">
+								<button type="submit" class="btn btn-primary">Remove</button>
+							</td>
+						</form>
 					</tr>
 					{% endfor %}
+					<form method="POST" action="/addCandidate" name="addCandidate">
 					<tr>
 						<td>Add:</td>
 						<td><input type="text" name="first_name"></input></td>
@@ -47,10 +55,11 @@
 						<td><input type="text" name="party"></input></td>
 					</tr>
 				</table>
-				<input type="submit" value="Add Candidate" class = "btn btn-medium btn-primary">
-				<a href="/sendBallots" class = "btn btn-success">Send Ballots</a>
-				<a href="/clear" class = "btn btn-success">Clear</a>
-				</form>
+				
+					<input type="submit" value="Add Candidate" class = "btn btn-medium btn-primary">
+					<a href="/sendBallots" class = "btn btn-success">Send Ballots</a>
+					<a href="/clear" class = "btn btn-success">Clear</a>
+				</form></br>
 				<a href="/saveCandidates" class = "btn btn-medium">Save Candidates to file</a>
 			</div>
 		</div>

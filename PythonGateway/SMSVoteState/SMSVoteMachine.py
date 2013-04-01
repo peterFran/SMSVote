@@ -51,7 +51,7 @@ class SMSVoteMachine(object):
 				# decrypt init
 				init = SMSSecInitiatorMessage(self.this_telephone, self.counterpart_telephone)
 				details = init.decryptMessage(message_body, self.counterpart.getPassword(), self.machine.getPrivateKey())
-				print "Details: ",details
+				print "INITIATOR RECIEVED"
 				self.session.initParameters(details['iv'], generate16ByteKey(self.counterpart.getPassword(),details['key_params']), details['random_challenge'])
 				# increment recieved count
 				self.session.incrementReceiveSequence()

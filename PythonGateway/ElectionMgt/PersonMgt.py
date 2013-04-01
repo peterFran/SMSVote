@@ -46,9 +46,15 @@ class PersonMgt(object):
 	def makeCandidate(self, person_id, election_id, party, candidate_id = None):
 		c = self.conn.cursor()
 		if candidate_id is None:
-			c.execute("INSERT INTO candidate(person_id, election_id, party) VALUES(%d,%d,'%s')" % (person_id, election_id, party))
+			if party is None:
+				c.execute("INSERT INTO candidate(person_id, election_id) VALUES(%d,%d)" % (person_id, election_id))
+			else:
+				c.execute("INSERT INTO candidate(person_id, election_id, party) VALUES(%d,%d,'%s')" % (person_id, election_id, party))
 		else:
-			c.execute("INSERT INTO candidate(person_id, election_id, party, candidate_id) VALUES(%d, %d, '%s', %d)" % (person_id, election_id, party, candidate_id))
+			if party is None:
+				c.execute("INSERT INTO candidate(person_id, election_id, candidate_id) VALUES(%d,%d,%d)" % (person_id, election_id,candidate_id))
+			else:
+				c.execute("INSERT INTO candidate(person_id, election_id, party, candidate_id) VALUES(%d, %d, '%s', %d)" % (person_id, election_id, party, candidate_id))
 		self.conn.commit()
 		return c.lastrowid
 	
@@ -86,6 +92,11 @@ class PersonMgt(object):
 	def clearCandidates(self, election_id):
 		c = self.conn.cursor()
 		c.execute("DELETE FROM candidate WHERE election_id = %d" % election_id)
+		self.conn.commit()
+	
+	def clearCandidate(self, candidate_id, election_id):
+		c = self.conn.cursor()
+		c.execute("DELETE FROM candidate WHERE candidate_id = %d and election_id = %d" % (candidate_id, election_id))
 		self.conn.commit()
 		
 	def getVoters(self, election_id):
