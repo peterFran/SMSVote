@@ -21,23 +21,62 @@ class ElectionMgt:
 	def close(self):
 		self.conn.close()
 	
-	def createElection(self, name, start_time, end_time):
+	def createElection(self, name, start_time, end_time, election_id=None):
 		c = self.conn.cursor()
-		c.execute("INSERT INTO election(voter_id, candidate_id) VALUES(%d,%d)" % (voter_id, candidate_id))
+		if election_id is None:
+			c.execute("INSERT INTO election(election_name, start_time, end_time) VALUES('?',?,?)", (name, start_time, end_time))
+		else:
+			c.execute("INSERT INTO election(election_name, start_time, end_time, election_id) VALUES('%s','%s','%s',%d)" % (name, start_time, end_time, election_id))
 		self.conn.commit()
+		return c.lastrowid
 	
-	def addVote(self, voter_id, candidate_id, election_id):
-		
+	def addVote(self, candidate_id, election_id):
 		c = self.conn.cursor()
-		if self.persons.getPersons(person_id=candidate_id, party_types=["CANDIDATE"], election_id=election_id) is None:
+		candidate = self.persons.getCandidate(candidate_id, election_id)
+		if candidate is None:
 			# Candidate does not exist
 			return None
 		
-		c.execute("INSERT INTO vote(voter_id, candidate_id, election_id) VALUES(%d,%d,%d)" % (voter_id, candidate_id, election_id))
+		c.execute("INSERT INTO vote(candidate_id, election_id) VALUES(%d,%d)" % (candidate_id, election_id))
 		self.conn.commit()
 		vote_id = c.lastrowid
-		row = c.execute("SELECT * FROM vote WHERE voter_id=%d and candidate_id=%d and election_id=%d" % (voter_id, candidate_id, election_id)).fetchone()
-		return {"vote_id":row[0], "voter_id":voter_id, "candidate_id":candidate_id, "election_id":election_id}
+		return {"vote_id":vote_id, "candidate_id":candidate_id, "first_name":candidate["first_name"], "last_name":candidate["last_name"], "party":candidate["party"], "election_id":election_id, }
+	
+	def getAllVotes(self, election_id):
+		c = self.conn.cursor()
+		rows = c.execute("SELECT vote_id, candidate_id FROM vote WHERE election_id = %d" % (election_id))
+		votes = []
+		for vote in rows:
+			votes.append({"vote_id":vote[0], "candidate_id":vote[1]})
+		return votes
+	
+	def getCandidateVotes(self, candidate_id, election_id):
+		c = self.conn.cursor()
+		rows = c.execute("SELECT vote_id FROM vote WHERE candidate_id=%d and election_id = %d" % (candidate_id, election_id))
+		votes = []
+		for vote in rows:
+			votes.append({"vote_id":vote[0], "candidate_id":candidate_id})
+		return votes
+	
+	def countVotes(self, election_id):
+		c = self.conn.cursor()
+		rows = c.execute("SELECT DISTINCT candidate_id FROM vote WHERE election_id = %d" % (election_id))
+		results = []
+		total = 0
+		winning_candidates = []
+		for row in rows:
+			votes = self.getCandidateVotes(row[0], election_id)
+			total += len(votes)
+			candidate_details = self.persons.getCandidate(row[0], election_id)
+			candidate_details["votes"] = len(votes)
+			results.append(candidate_details)
+			if len(winning_candidates) == 0:
+				winning_candidates.append(candidate_details)
+			elif candidate_details["votes"]> winning_candidates[0]["votes"]:
+				winning_candidates = [candidate_details]
+			elif candidate_details["votes"] == winning_candidates[0]["votes"]:
+				winning_candidates.append(candidate_details)
+		return {"total_votes":total, "results":results, "winners":winning_candidates}
 
 class ElectionMgtTests(unittest.TestCase):
 	def setUp(self):

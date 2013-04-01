@@ -34,7 +34,7 @@
 					</tr>
 					{% for candidate in candidates %}
 					<tr>
-						<td align="center">{{candidate['id']}}</td>
+						<td align="center">{{candidate['candidate_id']}}</td>
 						<td align="center">{{candidate['first_name']}}</td>
 						<td align="center">{{candidate['last_name']}}</td>
 						<td align="center">{{candidate['party']}}</td>
@@ -49,9 +49,7 @@
 				</table>
 				<input type="submit" value="Add Candidate" class = "btn btn-medium btn-primary">
 				<a href="/sendBallots" class = "btn btn-success">Send Ballots</a>
-				<a href="/startElection" class = "btn btn-success">Start Election</a>
 				<a href="/clear" class = "btn btn-success">Clear</a>
-				<a href="/testFormat" class = "btn btn-success">Test Format</a>
 				</form>
 				<a href="/saveCandidates" class = "btn btn-medium">Save Candidates to file</a>
 			</div>

@@ -12,7 +12,7 @@
 					<div class="navbar-inner">
 						<div class="container">
 							<ul class="nav">
-								<li class="active"><a href="/vote">Candidates</a></li>
+								<li class="active"><a href="/welcome">Candidates</a></li>
 								<li><a href="#">Results</a></li>
 								<li><a href="#">About</a></li>
 								<li><a href="#">Contact</a></li>
@@ -37,14 +37,14 @@
 					<tbody>
 					{% for candidate in candidates %}
 					<tr>
-						<form method="post" action="/sendSMS">
-							<td align="center">{{candidate['id']}}</td>
+						<form method="post" action="/vote">
+							<td align="center">{{candidate['candidate_id']}}</td>
 							<td align="center">{{candidate['first_name']}}</td>
 							<td align="center">{{candidate['last_name']}}</td>
 							<td align="center">{{candidate['party']}}</td>
 							<td align="center"><input type="submit" value="Cast Vote" class = "btn btn-medium btn-primary"></td>
-							<input type="integer" value="{{candidate['id']}}" name="candidate_id" hidden="true">
-							<input type="integer" value="{{voter['voter_id']}}" name="voter_id" hidden="true">
+							<input type="hidden" value="{{candidate['candidate_id']}}" name="candidate_id">
+							<input type="hidden" value="{{voter['voter_id']}}" name="voter_id">
 						</form>
 					</tr>
 					{% endfor %}

@@ -17,7 +17,7 @@ from Crypto.PublicKey import RSA
 def main():
 	# Get keys
 	this_key = RSA.importKey(open("app/static/keys/clientKey.txt","r").read())
-	client_public_key = open("app/static/keys/serverPub.txt","r").read()
+	server_public_key = open("app/static/keys/serverPub.txt","r").read()
 	
 	# Reset database
 	con = sqlite3.connect('app/static/data/machines.db')
@@ -28,7 +28,7 @@ def main():
 	
 	# Create Machine Model
 	this_model = SMSMachineModel("+441252236305",con)
-	client_model = SMSMachineModel("+442033229681",con)
+	server_model = SMSMachineModel("+442033229681",con)
 	
 	# Load this details
 	this_model.initMachine("abcdefgh")
@@ -36,8 +36,8 @@ def main():
 	this_model.addPrivateKey(this_key.exportKey())
 	
 	# Load client details
-	client_model.initMachine("hgfedcba")
-	client_model.addPublicKey(client_public_key)
+	server_model.initMachine("hgfedcba")
+	server_model.addPublicKey(server_public_key)
 	
 
 

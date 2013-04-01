@@ -1,1 +1,1 @@
-[{"party": "Tea", "first_name": "Jerome", "last_name": "Balshov", "id": 1}, {"party": "blue", "first_name": "Kerry", "last_name": "Lynn", "id": 2}]
+[{"first_name": "Jerome", "last_name": "Balshov", "candidate_id": 1, "person_id": 1, "party": "Tea", "election_id": 1}, {"first_name": "Kerry", "last_name": "Lynn", "candidate_id": 2, "person_id": 2, "party": "blue", "election_id": 1}, {"first_name": "Terry", "last_name": "Gillian", "candidate_id": 3, "person_id": 3, "party": "Cherries", "election_id": 1}]

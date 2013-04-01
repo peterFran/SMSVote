@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-initVoters.py
+initCandidates.py
 
-Created by Peter Meckiffe on 2013-03-30.
+Created by Peter Meckiffe on 2013-03-13.
 Copyright (c) 2013 UWE. All rights reserved.
 """
+
 import sys
 import sqlite3
-from ElectionMgt.PersonMgt import *
-from ElectionMgt.ElectionMgt import *
-from datetime import *
 import os
 import json
+from datetime import *
+from ElectionMgt.ElectionMgt import *
+from ElectionMgt.PersonMgt import *
+
 def main():
 	# Reset database
 	con = sqlite3.connect('./app/static/data/election.db')
@@ -23,22 +25,15 @@ def main():
 	con.commit()
 	election_mgt = ElectionMgt(con)
 	election_id = election_mgt.createElection("President of Nigeria", datetime.now(), datetime.now()+timedelta(days=1), election_id = 1)
-	filename = 'app/static/data/voters.txt'
-	with open(filename, 'r') as f:
-		voters = json.loads(f.read())
-		person_mgt = PersonMgt(con)
-		for voter in voters:
-			person_id = person_mgt.addPerson(voter["first_name"], voter["last_name"])
-			print person_mgt.makeVoter(person_id,1, voter_id=voter["voter_id"])
-	
 	filename = 'app/static/data/candidates.txt'
 	with open(filename, 'r') as f:
 		candidates = json.loads(f.read())
 		person_mgt = PersonMgt(con)
 		for candidate in candidates:
-			person_id = person_mgt.addPerson(candidate["first_name"], candidate["last_name"], check=False)
-			print person_mgt.makeCandidate(person_id, election_id, candidate["party"], candidate_id=candidate["candidate_id"])
+			person_id = person_mgt.addPerson(candidate["first_name"], candidate["last_name"])
+			print person_mgt.makeCandidate(person_id, election_id,candidate["party"], candidate_id=candidate["candidate_id"])
 
 
 if __name__ == '__main__':
 	main()
+

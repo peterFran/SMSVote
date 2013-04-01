@@ -2,6 +2,7 @@
 	<head>
 	<title>Candidates</title>
 	<link href="./static/bootstrap/bootstrap/css/bootstrap.css" rel="stylesheet">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 	</head>
 	<body>
 		<div class="container">
@@ -13,8 +14,6 @@
 							<ul class="nav">
 								<li><a href="/candidates">Candidates</a></li>
 								<li class="active"><a href="/results">Results</a></li>
-								<li><a href="#">Services</a></li>
-								<li><a href="#">Downloads</a></li>
 								<li><a href="#">About</a></li>
 								<li><a href="#">Contact</a></li>
 							</ul>
@@ -24,20 +23,23 @@
 			</div>
 			<!-- Jumbotron -->
 			<div class="jumbotron">
-				<h1>Candidates</h1>
-				<table class=".table-striped">
+				<h1>Results</h1>
+				<h2>Total votes counted: {{results["total_votes"]}}</h2>
+				<table class="table table-striped">
 					<tr>
 						<th>Candidate ID</th>
 						<th>First Name</th>
 						<th>Last Name</th>
 						<th>Party</th>
+						<th>Votes Received</th>
 					</tr>
-					{% for candidate in candidates %}
+					{% for candidate in results["results"] %}
 					<tr>
-						<td>{{candidate.id}}</td>
-						<td>{{candidate.first_name}}</td>
-						<td>{{candidate.last_name}}</td>
-						<td>{{candidate.party}}</td>
+						<td align="center">{{candidate['candidate_id']}}</td>
+						<td align="center">{{candidate['first_name']}}</td>
+						<td align="center">{{candidate['last_name']}}</td>
+						<td align="center">{{candidate['party']}}</td>
+						<td align="center">{{candidate['votes']}}</td>
 					</tr>
 					{% endfor %}
 				</table>
