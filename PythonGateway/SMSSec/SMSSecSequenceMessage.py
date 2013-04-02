@@ -16,23 +16,18 @@ class SMSSecSequenceMessage(SMSSecMessage):
 	
 	def createMessage(self, message, sequence_number, iv, aes_key):
 		encryptor = AESCipher(aes_key)
-		SQ = str(sequence_number)
-		self.message = encryptor.encrypt(message + SQ, iv)
+		SQ = unicode(sequence_number)
+		self.message = encryptor.encrypt(message, iv)+":"+SQ
 		# print "MESSAGE: ",self.message
 		# print "SQ:", sequence_number
 		# print "IV: ", iv
 		# print "KEY: ", aes_key
 	
-	def decryptMessage(self, encrypted_message, sequence_number, iv, aes_key):
+	def decryptMessage(self, encrypted_message, iv, aes_key):
 		# print "MESSAGE: ",encrypted_message
-		# print "SQ: ", sequence_number
 		# print "IV: ", iv
 		# print "KEY: ", aes_key
 		decryptor = AESCipher(aes_key)
 		plaintext = decryptor.decrypt(encrypted_message, iv)
-		length = len(str(sequence_number))
-		if str(sequence_number) != plaintext[-length:]:
-			raise ValueError("AES Decryption Failed")
-		message = plaintext[:-length]
-		return message
+		return plaintext
 	

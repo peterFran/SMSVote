@@ -21,16 +21,16 @@ class SMSSessionModel:
 	def close(self):
 		self.conn.close()
 	
-	def initParameters(self, iv, key, random_challenge):
+	def initParameters(self, iv, key, random_challenge, number_messages):
 		iv = base64.b64encode(iv)
 		random_challenge = base64.b64encode(random_challenge)
 		c = self.conn.cursor()
 		c.execute("SELECT * FROM session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()
 		if c is None:
-			c.execute("INSERT INTO session(telephone, iv, key, random_challenge, timestarted) values('%s', '%s', '%s', '%s', %f)" % (self.recipient_telephone, iv, key, random_challenge, time.time()))
+			c.execute("INSERT INTO session(telephone, iv, key, random_challenge, timestarted, number_messages) values('%s', '%s', '%s', '%s', %f, %d)" % (self.recipient_telephone, iv, key, random_challenge, time.time(),number_messages))
 		else:
 			c.execute("UPDATE session SET terminated='%s' where telephone='%s' and terminated = 0" % (time.time(), self.recipient_telephone))
-			c.execute("INSERT INTO session(telephone, iv, key, random_challenge, timestarted) values('%s', '%s', '%s', '%s', %f)" % (self.recipient_telephone, iv, key, random_challenge, time.time()))
+			c.execute("INSERT INTO session(telephone, iv, key, random_challenge, timestarted, number_messages) values('%s', '%s', '%s', '%s', %f, %d)" % (self.recipient_telephone, iv, key, random_challenge, time.time(), number_messages))
 		self.conn.commit()
 		return c.execute("SELECT session_id FROM session WHERE telephone='%s' AND terminated=0" % self.recipient_telephone).fetchone()[0]
 	
@@ -42,46 +42,25 @@ class SMSSessionModel:
 		c = self.conn.cursor()
 		return base64.b64decode(c.execute("SELECT random_challenge FROM session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0])
 	
-	def sendIV(self):
+	def handshakeComplete(self):
 		c = self.conn.cursor()
-		(iv, send_sequence) = c.execute("SELECT iv, send_sequence FROM session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()
-		iv = base64.b64decode(iv)
-		return getIV(iv, send_sequence)
+		return c.execute("SELECT handshake_complete FROM session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
 	
-	def receiveIV(self):
+	def completeHandshake(self):
 		c = self.conn.cursor()
-		(iv, receive_sequence) = c.execute("SELECT iv, receive_sequence FROM session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()
+		c.execute("UPDATE session SET handshake_complete=1 where telephone='%s' and terminated = 0" % self.recipient_telephone)
+		self.conn.commit()
+	
+	def getIV(self):
+		c = self.conn.cursor()
+		iv = c.execute("SELECT iv FROM session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
 		iv = base64.b64decode(iv)
-		return getIV(iv, receive_sequence)
+		return iv
 	
 	@ErrorIgnore([TypeError])
 	def sessionID(self):
 		c = self.conn.cursor()
 		return c.execute("SELECT session_id FROM session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
-	
-	def incrementSendSequence(self):
-		c = self.conn.cursor()
-		sq = c.execute("SELECT send_sequence from session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
-		sq = int(sq)+1
-		c.execute("UPDATE session SET send_sequence=%d, last_send_at=%f where telephone='%s' and terminated = 0" % (sq, time.time(), self.recipient_telephone))
-		self.conn.commit()
-	
-	def incrementReceiveSequence(self):
-		c = self.conn.cursor()
-		sq = c.execute("SELECT receive_sequence from session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
-		sq = int(sq)+1
-		c.execute("UPDATE session SET receive_sequence=%d, last_receive_at=%f where telephone='%s' and terminated = 0" % (sq, time.time(), self.recipient_telephone))
-		self.conn.commit()
-	
-	@ErrorIgnore([TypeError])
-	def sendSequence(self):
-		c = self.conn.cursor()
-		return c.execute("SELECT send_sequence from session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
-	
-	@ErrorIgnore([TypeError])
-	def receiveSequence(self):
-		c = self.conn.cursor()
-		return c.execute("SELECT receive_sequence from session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
 	
 	def terminate(self):
 		c = self.conn.cursor()
@@ -98,22 +77,21 @@ class SMSSessionModel:
 		c = self.conn.cursor()
 		return c.execute("SELECT stored_message from session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
 	
-	def addReceivedMessagePart(self, message):
+	def addMessage(self, message, sequence_number):
 		c = self.conn.cursor()
-		mes = c.execute("SELECT received_message from session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
-		if mes is not None:
-			message = mes + message
-		c.execute("UPDATE session SET received_message='%s' where telephone='%s' and terminated = 0" % (message, self.recipient_telephone))
+		number_messages = c.execute("SELECT number_messages FROM session WHERE session_id=%d" % self.sessionID()).fetchone()[0]
+		c.execute("INSERT INTO messages(message, session_id, sequence_number) VALUES('%s', %d, %d)" % (message, self.sessionID(), sequence_number))
 		self.conn.commit()
-	
-	@ErrorIgnore([TypeError])
-	def receivedMessage(self):
-		c = self.conn.cursor()
-		return c.execute("SELECT received_message from session where telephone='%s' and terminated = 0" % self.recipient_telephone).fetchone()[0]
+		messages = c.execute("SELECT message FROM messages WHERE session_id=%d ORDER BY sequence_number" % self.sessionID()).fetchall()
+		if len(messages) == number_messages:
+			message_list = []
+			for m in messages:
+				message_list.append(m[0])
+			return message_list
 	
 
-def getIV(IV, SQ):
-	for i in range(0,SQ):
+def calculateIV(IV, SQ):
+	for i in range(0,SQ+1):
 		IV = hashlib.sha256(IV).hexdigest()[0:16]
 	return IV
 	

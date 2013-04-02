@@ -95,7 +95,6 @@ def processCandidates(plain_message):
 	person_mgt = PersonMgt(con)
 	person_mgt.clearCandidates(election_id)
 	for candidate in candidates:
-		
 		print candidate['candidate_id'],"\t",candidate['first_name'],"\t",candidate['last_name'],"\t", candidate['party']
 		person_id = person_mgt.addPerson(candidate['first_name'],candidate['last_name'], check=False)
 		candidate_id = person_mgt.makeCandidate(person_id, election_id, candidate['party'], candidate_id=candidate['candidate_id'])
